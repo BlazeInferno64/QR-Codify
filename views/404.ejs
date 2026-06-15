@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 · Page Not Found</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(99, 102, 241, 0.15), transparent 25%),
+        linear-gradient(135deg, #07111f 0%, #0b1324 45%, #030712 100%);
+      color: #edf2ff;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    .badge-soft {
+      background: rgba(129, 140, 248, 0.15);
+      color: #dbe4ff;
+      border: 1px solid rgba(129, 140, 248, 0.25);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      box-shadow: 0 10px 22px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.06);
+    }
+  </style>
+</head>
+<body class="d-flex align-items-center">
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <section class="glass p-5 p-md-6 text-center">
+          <span class="badge badge-soft rounded-pill px-3 py-2 mb-3">404 — Not Found</span>
+          <h1 class="display-5 fw-bold mb-3">Looks like this page wandered off.</h1>
+          <p class="lead text-light-emphasis mb-4">
+            The route you tried to open is unavailable right now.
+          </p>
+
+          <div class="row g-3 text-start mb-4">
+            <div class="col-md-6">
+              <div class="p-3 rounded-4 border border-secondary-subtle bg-dark bg-opacity-25">
+                <small class="text-uppercase text-secondary">Your IP Address</small>
+                <div class="fw-semibold text-white"><%= ip %></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 rounded-4 border border-secondary-subtle bg-dark bg-opacity-25">
+                <small class="text-uppercase text-secondary">Method</small>
+                <div class="fw-semibold text-white"><%= method %></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 rounded-4 border border-secondary-subtle bg-dark bg-opacity-25">
+                <small class="text-uppercase text-secondary">Requested Path</small>
+                <div class="fw-semibold text-white"><%= path %></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 rounded-4 border border-secondary-subtle bg-dark bg-opacity-25">
+                <small class="text-uppercase text-secondary">UserAgent</small>
+                <div class="fw-semibold text-white"><%= userAgent %></div>
+              </div>
+            </div>
+          </div>
+
+          <a href="/" class="btn btn-primary btn-lg px-4">Go back home</a>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
