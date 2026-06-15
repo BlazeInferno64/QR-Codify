@@ -12,8 +12,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.0",
+    "@vercel/node": "^5.8.17",
     "@zxing/library": "^0.23.0",
-    "canvas": "^3.2.3",
     "chalk": "^5.6.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

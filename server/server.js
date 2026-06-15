@@ -18,7 +18,7 @@ import morgan from 'morgan';
 import chalk from 'chalk';
 import QRCode from "qrcode";
 import { MultiFormatReader, RGBLuminanceSource, BinaryBitmap, HybridBinarizer, DecodeHintType, BarcodeFormat } from '@zxing/library';
-import { createCanvas, loadImage, registerFont } from 'canvas';
+import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
 
 import packageJson from '../package.json' with { type: 'json' };
 
@@ -45,10 +45,10 @@ const fontDir = path.join(__dirname, 'fonts');
 
 // Registers the local Geist Mono font family for canvas usage.
 try {
-    registerFont(path.join(fontDir, 'GeistMono-Medium.ttf'), { family: 'Geist Mono', weight: '500' });
-    registerFont(path.join(fontDir, 'GeistMono-Bold.ttf'), { family: 'Geist Mono', weight: '700' });
+    GlobalFonts.registerFromPath(path.join(fontDir, 'GeistMono-Medium.ttf'), 'Geist Mono');
+    GlobalFonts.registerFromPath(path.join(fontDir, 'GeistMono-Bold.ttf'), 'Geist Mono');
 } catch (e) {
-    console.log('Font files not found at the resolved local paths, using canvas fallback properties safely.');
+    console.log('Font files not found at the resolved local paths.', e);
 }
 
 
