@@ -22,9 +22,18 @@ import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
 
 import packageJson from '../package.json' with { type: 'json' };
 
+const formatBytes = (bytes) => {
+    if (!bytes || isNaN(bytes) || bytes <= 0) return '0 B';
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
+};
+
+const myLimit = 45
+
 const limiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 45,
+    max: myLimit,
     standardHeaders: true,
     legacyHeaders: false,
     validate: { trustProxy: false },
@@ -48,9 +57,26 @@ try {
     GlobalFonts.registerFromPath(path.join(fontDir, 'GeistMono-Medium.ttf'), 'Geist Mono');
     GlobalFonts.registerFromPath(path.join(fontDir, 'GeistMono-Bold.ttf'), 'Geist Mono');
 } catch (e) {
-    console.log('Font files not found at the resolved local paths.', e);
+    console.log('Font files not found at the resolved local paths, using canvas fallback properties safely.');
 }
 
+// Token to calculate incoming request payload volume (Headers + Body size)
+morgan.token('incoming_bytes', (req) => {
+    // Calculate the rough size of the incoming HTTP headers
+    const headersSize = req.rawHeaders ? req.rawHeaders.reduce((acc, current) => acc + current.length, 0) : 0;
+
+    // Add the content-length of the body if it exists
+    const bodySize = parseInt(req.headers['content-length'], 10) || 0;
+
+    const totalIncomingBytes = headersSize + bodySize;
+    return chalk.yellow(formatBytes(totalIncomingBytes));
+});
+
+// Token to calculate outgoing response body volume
+morgan.token('outgoing_bytes', (req, res) => {
+    const outgoing = parseInt(res.getHeader('content-length'), 10) || 0;
+    return chalk.green(formatBytes(outgoing));
+});
 
 //  Extract and normalize client IP
 morgan.token('user_ip', (req) => {
@@ -74,7 +100,7 @@ morgan.token('color_res_time', (req, res) => {
     // Calculate precise diff in milliseconds
     const ms = (res._startAt[0] - req._startAt[0]) * 1e3 + (res._startAt[1] - req._startAt[1]) * 1e-6;
     const formatted = `${ms.toFixed(2)} ms`;
-    
+
     if (ms > 400) return chalk.red.bold(formatted);   // Performance bottleneck
     if (ms > 150) return chalk.yellow.bold(formatted); // Moderate latency
     return chalk.green(formatted);                    // Fast execution
@@ -102,8 +128,8 @@ morgan.token('color_agent', (req) => {
 morgan.token('color_status', (req, res) => {
     const status = res.statusCode;
     const color = status >= 500 ? chalk.red.bold :
-                  status >= 400 ? chalk.yellow.bold :
-                  status >= 300 ? chalk.blue.bold : chalk.green.bold;
+        status >= 400 ? chalk.yellow.bold :
+            status >= 300 ? chalk.blue.bold : chalk.green.bold;
     return color(status);
 });
 
@@ -111,11 +137,12 @@ morgan.token('color_status', (req, res) => {
 const isVercel = !!process.env.VERCEL;
 
 const myCustomFormat = isVercel
-    ? `[:color_method] :url -> Status: :color_status | Time: :color_res_time | IP: :user_ip :qr_meta`
+    ? `[:color_method] :url -> Status: :color_status | In: :incoming_bytes | Out: :outgoing_bytes | Time: :color_res_time | IP: :user_ip :qr_meta`
     : `\n${chalk.bold.underline('📥 QR Codify Incoming Request')}\n` +
-      ` ├─ Request : :color_method ${chalk.white(':url')} HTTP/:http-version :qr_meta\n` +
-      ` ├─ Identity: IP '${chalk.magenta(':user_ip')}' | Agent: :color_agent\n` +
-      ` └─ Outcome : Status :color_status in :color_res_time on [${chalk.green(':date[clf]')}]\n`;
+    ` ├─ Request : :color_method ${chalk.white(':url')} HTTP/:http-version :qr_meta\n` +
+    ` ├─ Identity: IP '${chalk.magenta(':user_ip')}' | Agent: :color_agent\n` +
+    ` ├─ Traffic : Incoming: :incoming_bytes | Outgoing: :outgoing_bytes\n` +
+    ` └─ Outcome : Status :color_status in :color_res_time on [${chalk.green(':date[clf]')}]\n`;
 
 app.use(morgan(myCustomFormat));
 
@@ -144,7 +171,14 @@ app.disable('x-powered-by');
 app.get('/', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('QR-Codify-Engine-Version', packageJson.version);
-    return res.render('index');
+    const year = new Date().getFullYear();
+    return res.render('index', {
+        'themeNum': 4,
+        'themeWord': 'Four',
+        'previewTheme': 'cyber',
+        'serverYear': year,
+        'rateLim': myLimit,
+    });
 });
 
 app.get('/health', (req, res) => {
@@ -195,10 +229,10 @@ app.get('/api/themes/:themeName/preview', async (req, res) => {
         const mainFill = theme.getFill(ctx, size);
         ctx.fillStyle = mainFill;
         ctx.font = '700 48px "Geist Mono", monospace';
-        ctx.textAlign = 'center'; 3
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(themeName, size / 2, size / 2);
-        const buffer = canvas.toBuffer('image/png');
+        const buffer = await canvas.toBuffer('image/png');
         res.type('image/png');
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('QR-Codify-Engine-Version', packageJson.version);
@@ -214,17 +248,14 @@ const rawParser = express.raw({ type: 'image/*', limit: '10mb' });
 
 app.get('/logo', async (req, res) => {
     try {
-
-        /*
-            if (req.get('x-internal-request') !== 'true') {
-                return res.status(404).end()
-            }*/
-
         const size = 512;
         const canvas = createCanvas(size, size);
         const ctx = canvas.getContext('2d');
 
-        function roundedRect(x, y, w, h, r) {
+        // Clean helper to draw fluid rounded panels safely
+        function drawRoundedCard(x, y, w, h, r, fillStyle) {
+            r = Math.min(r, w / 2, h / 2);
+            ctx.fillStyle = fillStyle;
             ctx.beginPath();
             ctx.moveTo(x + r, y);
             ctx.lineTo(x + w - r, y);
@@ -239,55 +270,60 @@ app.get('/logo', async (req, res) => {
             ctx.fill();
         }
 
-        // soft background
-        ctx.fillStyle = '#F7F9FC';
+        // 1. Sleek deep dark space background
+        ctx.fillStyle = '#060913';
         ctx.fillRect(0, 0, size, size);
 
-        // subtle shadow card
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.08)';
-        roundedRect(44, 52, 424, 408, 36);
+        // 2. Proportioned QR component (Centered vertically: 256 - 60 = 196)
+        const eyeX = 64;
+        const eyeY = 196; // Perfectly splits the 512px height frame evenly
 
-        // main logo card
-        ctx.fillStyle = '#FFFFFF';
-        roundedRect(40, 48, 424, 408, 36);
+        drawRoundedCard(eyeX, eyeY, 120, 120, 32, '#00E5FF'); // Neon Cyan Outer Ring
+        drawRoundedCard(eyeX + 22, eyeY + 22, 76, 76, 18, '#060913'); // Core background knockout
+        drawRoundedCard(eyeX + 40, eyeY + 40, 40, 40, 10, '#00E5FF'); // Solid Inner Eye
 
-        // QR-style icon block only (not a full QR code)
-        ctx.fillStyle = '#111827';
-        roundedRect(96, 116, 120, 120, 22);
-        ctx.fillStyle = '#FFFFFF';
-        roundedRect(116, 136, 80, 80, 18);
-        ctx.fillStyle = '#111827';
-        roundedRect(136, 156, 40, 40, 10);
-
-        // small QR dots for the icon feel
-        const dots = [
-            [240, 150], [270, 150], [300, 150],
-            [240, 180], [300, 180],
-            [240, 210], [270, 210], [300, 210]
-        ];
-        ctx.fillStyle = '#111827';
-        dots.forEach(([x, y]) => {
-            ctx.beginPath();
-            ctx.arc(x, y, 8, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // text branding
+        // 3. Typographic Branding using Vercel Geist Mono
         ctx.textAlign = 'left';
+
+        // Changing to 'middle' allows us to align text perfectly with the 
+        // horizontal center line of the QR Finder Eye (eyeY + 60)
         ctx.textBaseline = 'middle';
-        ctx.font = '700 44px "Geist Mono", monospace';
-        ctx.fillStyle = '#111827';
-        ctx.fillText('QR Codify', 96, 306);
 
-        ctx.font = '700 20px "Geist Mono", monospace';
-        ctx.fillStyle = '#6B7280';
-        ctx.fillText('All in one solution for\nQR codes', 96, 352);
+        const textStartX = 214;
+        const textCenterY = eyeY + 60; // 256px (Perfect horizontal center-line)
 
-        const buffer = canvas.toBuffer('image/png');
+        // Primary Title: "QR"
+        ctx.font = '700 48px "Geist Mono"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('QR', textStartX, textCenterY - 10); // Elevated slightly to balance subtitle spacing
+
+        // Calculate offset dynamically for perfect monospace inline alignment
+        // Measuring "QR " with a trailing space provides standard character tracking gap
+        const qrWidth = ctx.measureText('QR ').width;
+
+        // Secondary Title: "Codify"
+        ctx.font = '700 48px "Geist Mono"';
+        ctx.fillStyle = '#94A3B8'; // Premium slate text color
+        ctx.fillText('Codify', textStartX + qrWidth, textCenterY - 10);
+
+        // 4. Structural Subtitle Decorator with a Neon Pulse Element
+        // Small active engine indicator block
+        ctx.fillStyle = '#00E5FF';
+        ctx.fillRect(textStartX, textCenterY + 32, 6, 6);
+
+        // Subtitle Text
+        ctx.font = '500 16px "Geist Mono"';
+        ctx.fillStyle = '#475569'; // Clean muted gray
+        ctx.fillText('QR Codes done right!', textStartX + 16, textCenterY + 34);
+
+        // Convert canvas data directly into a raw binary buffer stream
+        const buffer = await canvas.toBuffer('image/png');
+
         res.type('image/png');
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('QR-Codify-Logo', 'true');
         res.setHeader('QR-Codify-Engine-Version', packageJson.version);
+
         return res.send(buffer);
     } catch (error) {
         console.error(error);
@@ -295,11 +331,12 @@ app.get('/logo', async (req, res) => {
     }
 });
 
+app.get('/favicon.ico', (req, res) => {
+    return res.redirect('/logo');
+});
+
 app.all('/api/generate', rawParser, async (req, res) => {
     try {
-        // Gather text configuration options from query parameters or JSON body.
-        // Merge both sources so POST body and GET query params both work;
-        // req.query takes precedence if a key appears in both.
         const { data, size, theme, banner: queryBanner } = { ...req.body, ...req.query };
 
         if (!data) {
@@ -310,11 +347,25 @@ app.all('/api/generate', rawParser, async (req, res) => {
             return res.status(400).json({ error: "Data payload is too large. Maximum length allowed is 1200 characters." });
         }
 
-        let qrSize = 500;
-        if (size !== undefined && size !== null && size !== '') {
-            // Accept either a plain number (600) or a "WxH" string ("600x600")
-            const w = parseInt(typeof size === 'number' ? size : String(size).split('x')[0], 10);
-            if (!isNaN(w) && w > 0) qrSize = w;
+        // Safe parsing for size query parameters (Handles: 500, "500", "500x500", "500x300")
+        let qrSize = 500; // Default fallback size
+        if (req.query.size) {
+            const sizeStr = String(req.query.size).trim().toLowerCase();
+
+            if (sizeStr.includes('x')) {
+                // Split by 'x' and parse the first dimension (width) as our square dimension
+                const parts = sizeStr.split('x');
+                const parsedWidth = parseInt(parts[0], 10);
+                if (!isNaN(parsedWidth)) {
+                    qrSize = parsedWidth;
+                }
+            } else {
+                // Handle standard single dimension format
+                const parsedSize = parseInt(sizeStr, 10);
+                if (!isNaN(parsedSize)) {
+                    qrSize = parsedSize;
+                }
+            }
         }
 
         const activeTheme = (theme && QR_THEMES[theme.toLowerCase()]) ? QR_THEMES[theme.toLowerCase()] : null;
@@ -337,8 +388,9 @@ app.all('/api/generate', rawParser, async (req, res) => {
 
         const mainFill = activeTheme ? activeTheme.getFill(ctx, qrSize) : '#000000';
 
-        // Custom Geometry Drawing Methods
+        // Custom Geometry Drawing Methods (with strict Skia compatibility)
         function drawRoundedRect(x, y, w, h, r) {
+            r = Math.min(r, w / 2, h / 2);
             ctx.beginPath();
             ctx.moveTo(x + r, y);
             ctx.lineTo(x + w - r, y);
@@ -351,6 +403,7 @@ app.all('/api/generate', rawParser, async (req, res) => {
             ctx.quadraticCurveTo(x, y, x + r, y);
             ctx.closePath();
             ctx.fill();
+            ctx.beginPath(); // Clear path context immediately for Skia
         }
 
         function drawFinder(col, row) {
@@ -377,15 +430,25 @@ app.all('/api/generate', rawParser, async (req, res) => {
                 ctx.beginPath();
                 ctx.arc(x + 3.5 * moduleSize, y + 3.5 * moduleSize, innerSize / 2, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.beginPath();
             } else {
                 drawRoundedRect(x + innerPad, y + innerPad, innerSize, innerSize, moduleSize * 0.5);
             }
         }
 
         const finderZones = [[0, 0], [moduleCount - 7, 0], [0, moduleCount - 7]];
-        const bannerMatrixSize = Math.floor(moduleCount * 0.22);
+
+        // Globally defined sizing constraints to ensure scoping safety inside loop iterations
+        const bannerMatrixSize = Math.floor(moduleCount * 0.24);
         const centerStart = Math.floor((moduleCount - bannerMatrixSize) / 2);
         const centerEnd = centerStart + bannerMatrixSize;
+
+        // Force clear all data bits inside the central banner region to eliminate neighbor checking edge-cases
+        for (let r = centerStart; r < centerEnd; r++) {
+            for (let c = centerStart; c < centerEnd; c++) {
+                qrMatrix.set(r, c, 0);
+            }
+        }
 
         // Matrix Rendering Loop
         ctx.fillStyle = mainFill;
@@ -396,6 +459,7 @@ app.all('/api/generate', rawParser, async (req, res) => {
                 );
                 if (inFinder) continue;
 
+                // Stop loop early if inside center banner area
                 if (col >= centerStart && col < centerEnd && row >= centerStart && row < centerEnd) {
                     continue;
                 }
@@ -427,6 +491,7 @@ app.all('/api/generate', rawParser, async (req, res) => {
                         ctx.beginPath();
                         ctx.arc(cx, cy, dotRadius, 0, Math.PI * 2);
                         ctx.fill();
+                        ctx.beginPath(); // Keep global path clean
                     }
                 }
             }
@@ -437,22 +502,19 @@ app.all('/api/generate', rawParser, async (req, res) => {
         drawFinder(moduleCount - 7, 0);
         drawFinder(0, moduleCount - 7);
 
-        // Banner Detection: Try to locate a valid binary or base64 asset
+        // Banner Detection
         let bannerBuffer = null;
         let hasImageBanner = false;
 
-        // Is it uploaded as a raw binary image in req.body?
         if (Buffer.isBuffer(req.body) && req.body.length > 0) {
             bannerBuffer = req.body;
         }
-        // Was it sent as a Base64 string inside the query parameter?
         else if (queryBanner) {
             const rawBase64 = queryBanner.startsWith('data:image') ? queryBanner.split(',')[1] : queryBanner;
             const cleanBase64 = rawBase64.trim().replace(/ /g, '+');
             bannerBuffer = Buffer.from(cleanBase64, 'base64');
         }
 
-        // Process image banner buffer if discovered
         if (bannerBuffer && bannerBuffer.length >= 8) {
             try {
                 const bannerImg = await loadImage(bannerBuffer);
@@ -479,34 +541,41 @@ app.all('/api/generate', rawParser, async (req, res) => {
 
         // Fallback Vector Text Branding
         if (!hasImageBanner) {
-            const badgeSize = qrSize * 0.21;
+            const badgeSize = qrSize * 0.24; // Expanded to safely encompass the text layout bounds
             const centerPos = (qrSize - badgeSize) / 2;
             const centerCoord = qrSize / 2;
 
+            // Draw clean background block for the logo card
             ctx.fillStyle = bgColour;
             drawRoundedRect(centerPos, centerPos, badgeSize, badgeSize, activeTheme ? moduleSize * 1.2 : moduleSize * 0.8);
 
-            const textMainColor = activeTheme ? '#FFFFFF' : '#000000';
+            let textMainColor = '#000000';
             let textSubColor = '#444444';
+
             if (activeTheme) {
-                if (theme.toLowerCase() === 'cyber') textSubColor = '#ec4899';
-                else if (theme.toLowerCase() === 'tokyonight') textSubColor = '#bb9af7';
-                else if (theme.toLowerCase() === 'neon') textSubColor = '#00ffcc';
+                const themeKey = theme.toLowerCase();
+                textMainColor = activeTheme.getFill(ctx, qrSize);
+
+                if (themeKey === 'cyber') textSubColor = '#ec4899';
+                else if (themeKey === 'tokyonight') textSubColor = '#bb9af7';
+                else if (themeKey === 'neon') textSubColor = '#00ffcc';
             }
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            ctx.font = '700 32px "Geist Mono", monospace';
+            // Top Primary Text
+            ctx.font = '700 34px "Geist Mono"';
             ctx.fillStyle = textMainColor;
-            ctx.fillText('QR', centerCoord, centerCoord - 12);
+            ctx.fillText('QR', centerCoord, centerCoord - 14);
 
-            ctx.font = '1000 20px "Geist Mono", monospace';
+            // Bottom Branding Accent Text
+            ctx.font = '700 26px "Geist Mono"';
             ctx.fillStyle = textSubColor;
-            ctx.fillText('Codify', centerCoord, centerCoord + 18);
+            ctx.fillText('Codify', centerCoord, centerCoord + 16);
         }
 
-        const buffer = canvas.toBuffer('image/png');
+        const buffer = await canvas.toBuffer('image/png');
         res.type('image/png');
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('QR-Codify-Theme', activeTheme ? theme.toLowerCase() : 'default');
@@ -528,7 +597,6 @@ app.post('/api/read', rawParser, async (req, res) => {
     try {
         let imageBuffer;
 
-        // Handle Input Formats
         if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
             const { image } = req.body;
             if (!image) {
@@ -548,7 +616,6 @@ app.post('/api/read', rawParser, async (req, res) => {
             });
         }
 
-        // Load Image into Canvas to get raw RGBA pixels
         const image = await loadImage(imageBuffer);
         const canvas = createCanvas(image.width, image.height);
         const ctx = canvas.getContext('2d');
@@ -558,19 +625,16 @@ app.post('/api/read', rawParser, async (req, res) => {
         const argbLen = imageData.width * imageData.height;
         const luminancePoints = new Uint8ClampedArray(argbLen);
 
-        // Convert RGBA to Grayscale Luminance values for ZXing
         for (let i = 0; i < argbLen; i++) {
             const r = imageData.data[i * 4];
             const g = imageData.data[i * 4 + 1];
             const b = imageData.data[i * 4 + 2];
-            // Standard luminance conversion formula
             luminancePoints[i] = (r * 0.2126 + g * 0.7152 + b * 0.0722);
         }
 
-        //  Setup ZXing Reader with high-performance configurations
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
-        hints.set(DecodeHintType.TRY_HARDER, true); // Tells ZXing to spend more CPU cycles parsing complex styles
+        hints.set(DecodeHintType.TRY_HARDER, true);
 
         const reader = new MultiFormatReader();
         reader.setHints(hints);
@@ -578,7 +642,6 @@ app.post('/api/read', rawParser, async (req, res) => {
         const luminanceSource = new RGBLuminanceSource(luminancePoints, imageData.width, imageData.height);
         const binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
 
-        // Decode the matrix
         const result = reader.decode(binaryBitmap);
 
         res.setHeader('Cache-Control', 'no-store');
@@ -592,7 +655,6 @@ app.post('/api/read', rawParser, async (req, res) => {
         });
 
     } catch (error) {
-        // ZXing throws an error when it can't find a barcode, map it to a readable message
         if (error.name === 'NotFoundException' || error.message?.includes('No MultiFormat Readers')) {
             return res.status(422).json({
                 success: false,
@@ -605,7 +667,6 @@ app.post('/api/read', rawParser, async (req, res) => {
     }
 });
 
-// 404 handler: API routes return JSON, browser routes use the EJS page
 app.use((req, res, next) => {
     if (req.originalUrl.startsWith('/api')) {
         return res.status(404).json({

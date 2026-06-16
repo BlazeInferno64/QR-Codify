@@ -1,7 +1,7 @@
 {
   "name": "qr-codify",
   "version": "1.0.0",
-  "description": "",
+  "description": "All in one QR Codes solution by QR Codify",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,6 +15,7 @@
     "@napi-rs/canvas": "^1.0.0",
     "@vercel/node": "^5.8.17",
     "@zxing/library": "^0.23.0",
+    "canvas": "^3.2.3",
     "chalk": "^5.6.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
