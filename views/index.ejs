@@ -755,7 +755,7 @@
               <span class="trust-pill tp-amber" style="font-size:.6rem;padding:2px 6px;"><%- rateLim %> req/min</span>
             </div>
             <div class="small" style="color:rgba(226,232,240,0.45); font-size: 0.75rem;">JSON body: <code
-                style="color:#a5b4fc;">{ image: "&lt;base64&gt;" }</code> → decodes QR</div>
+                style="color:#a5b4fc;">{ image: "&lt;base64/binary/formdata&gt;" }</code> → decodes QR</div>
           </div>
         </div>
       </div>
@@ -929,6 +929,11 @@
           <div class="mini-card p-3">
             <h6 class="fw-semibold mb-2 small text-white">Decoded Contents</h6>
             <pre id="scanResult">Waiting for target selection...</pre>
+            <a id="scanOpenLink" href="#" target="_blank" rel="noopener noreferrer"
+              class="btn btn-primary-custom btn-sm w-100 fw-semibold mt-2"
+              style="display:none;">
+              <i class="material-symbols-outlined" style="font-size:1rem;">open_in_new</i>&nbsp;Open Link
+            </a>
           </div>
         </div>
 
@@ -1000,7 +1005,9 @@ window.open(imageUrl);`;
     async function scanUploadedFile() {
       const input = document.getElementById('scanFileInput');
       const resultBox = document.getElementById('scanResult');
+      const openLinkBtn = document.getElementById('scanOpenLink');
       if (!input?.files[0]) return alert('Select an image first.');
+      openLinkBtn.style.display = 'none';
       const reader = new FileReader();
       reader.onload = async () => {
         resultBox.textContent = 'Analyzing...';
@@ -1011,9 +1018,18 @@ window.open(imageUrl);`;
             body: JSON.stringify({ image: reader.result })
           });
           const data = await response.json();
-          resultBox.textContent = JSON.stringify(data, null, 2);
+          const decoded = data.response ? data.response : data.error;
+          resultBox.textContent = decoded;
+          try {
+            const url = new URL(decoded.trim());
+            if (url.protocol === 'https:' || url.protocol === 'http:') {
+              openLinkBtn.href = url.href;
+              openLinkBtn.style.display = 'flex';
+            }
+          } catch (_) {}
         } catch (e) {
           resultBox.textContent = 'Error decoding image.';
+          openLinkBtn.style.display = 'none';
         }
       };
       reader.readAsDataURL(input.files[0]);
