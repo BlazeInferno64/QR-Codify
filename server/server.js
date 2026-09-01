@@ -325,7 +325,7 @@ app.get('/favicon.ico', (req, res) => {
 // ====================================================================
 app.all('/api/generate', async (req, res) => {
     try {
-        let data, size, theme, queryBanner;
+        let data, size, theme, queryBanner, format;
         let bannerBuffer = null;
         const contentType = req.headers['content-type'] || '';
 
@@ -358,6 +358,7 @@ app.all('/api/generate', async (req, res) => {
                     size = combined.size;
                     theme = combined.theme;
                     queryBanner = combined.banner;
+                    format = combined.format;
                     bannerBuffer = fileBuffer;
                     resolve();
                 });
@@ -374,11 +375,11 @@ app.all('/api/generate', async (req, res) => {
                 req.on('end', () => resolve(Buffer.concat(chunks)));
                 req.on('error', (err) => reject(err));
             });
-            ({ data, size, theme } = req.query);
+            ({ data, size, theme, format } = req.query);
         }
         // C. FALLBACK TO STANDARD JSON PAYLOAD (Matches express.json parsing layers)
         else {
-            ({ data, size, theme, banner: queryBanner } = { ...req.body, ...req.query });
+            ({ data, size, theme, banner: queryBanner, format } = { ...req.body, ...req.query });
 
             if (queryBanner && typeof queryBanner === 'string') {
                 const rawBase64 = queryBanner.startsWith('data:image') ? queryBanner.split(',')[1] : queryBanner;
@@ -416,7 +417,7 @@ app.all('/api/generate', async (req, res) => {
         const qrMatrix = QRCode.create(data, { errorCorrectionLevel: 'H' }).modules;
         const moduleCount = qrMatrix.size;
 
-        const MARGIN = 1;
+        const MARGIN = 4; // ISO/IEC 18004 minimum quiet zone
         const totalModules = moduleCount + MARGIN * 2;
         const moduleSize = qrSize / totalModules;
 
@@ -606,6 +607,76 @@ app.all('/api/generate', async (req, res) => {
             ctx.fillText('Codify', centerCoord, centerCoord + 16);
         }
 
+        const outputFormat = (format || 'png').toLowerCase();
+
+        if (!['png', 'jpg', 'jpeg', 'svg'].includes(outputFormat)) {
+            return res.status(400).json({ error: "Unsupported format. Valid options are: png, jpg, svg." });
+        }
+
+        if (outputFormat === 'svg') {
+            if (bannerBuffer) {
+                return res.status(400).json({ error: "Banner images are not supported in SVG format." });
+            }
+            const svgSupportsTheme = activeTheme && activeTheme.foreground && activeTheme.background && !activeTheme.getFill;
+            const svgString = await QRCode.toString(data, {
+                type: 'svg',
+                errorCorrectionLevel: 'H',
+                width: qrSize,
+                color: {
+                    dark: svgSupportsTheme ? activeTheme.foreground : '#000000',
+                    light: svgSupportsTheme ? activeTheme.background : '#ffffff',
+                },
+            });
+            const centerX = qrSize / 2;
+            const centerY = qrSize / 2;
+            const badgeHalf = qrSize * 0.12;
+            const rectX = centerX - badgeHalf;
+            const rectY = centerY - badgeHalf;
+            const rectW = badgeHalf * 2;
+            const rectH = badgeHalf * 2;
+            const rectR = rectW * 0.12;
+
+            const svgMainColor = '#000000';
+            const svgSubColor = '#444444';
+
+            const logoOverlay = `
+  <rect x="${rectX}" y="${rectY}" width="${rectW}" height="${rectH}" rx="${rectR}" ry="${rectR}" fill="#ffffff"/>
+  <text x="${centerX}" y="${centerY - 7}" font-family="monospace" font-size="${qrSize * 0.068}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${svgMainColor}">QR</text>
+  <text x="${centerX}" y="${centerY + 18}" font-family="monospace" font-size="${qrSize * 0.052}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${svgSubColor}">Codify</text>`;
+
+            const svgWithLogo = svgString.replace('</svg>', `${logoOverlay}\n</svg>`);
+            const svgBuffer = Buffer.from(svgWithLogo, 'utf-8');
+            res.type('image/svg+xml');
+            res.setHeader('Cache-Control', 'no-store');
+            res.setHeader('QR-Codify-Theme', activeTheme ? theme.toLowerCase() : 'default');
+            res.setHeader('QR-Codify-Bytes', svgBuffer.length.toString());
+            res.setHeader('QR-Codify-Charset', 'utf-8');
+            res.setHeader('QR-Codify-Format', 'QR_CODE');
+            res.setHeader('QR-Codify-Error-Correction', 'H');
+            res.setHeader('QR-Codify-Size', `${qrSize}x${qrSize}`);
+            res.setHeader('QR-Codify-Engine-Version', packageJson.version);
+            return res.send(svgBuffer);
+        }
+
+        if (outputFormat === 'jpg' || outputFormat === 'jpeg') {
+            const jpegCanvas = createCanvas(canvas.width, canvas.height);
+            const jpegCtx = jpegCanvas.getContext('2d');
+            jpegCtx.fillStyle = activeTheme ? activeTheme.background : '#ffffff';
+            jpegCtx.fillRect(0, 0, jpegCanvas.width, jpegCanvas.height);
+            jpegCtx.drawImage(canvas, 0, 0);
+            const buffer = await jpegCanvas.toBuffer('image/jpeg', { quality: 92 });
+            res.type('image/jpeg');
+            res.setHeader('Cache-Control', 'no-store');
+            res.setHeader('QR-Codify-Theme', activeTheme ? theme.toLowerCase() : 'default');
+            res.setHeader('QR-Codify-Bytes', buffer.length.toString());
+            res.setHeader('QR-Codify-Charset', 'utf-8');
+            res.setHeader('QR-Codify-Format', 'QR_CODE');
+            res.setHeader('QR-Codify-Error-Correction', 'H');
+            res.setHeader('QR-Codify-Size', `${qrSize}x${qrSize}`);
+            res.setHeader('QR-Codify-Engine-Version', packageJson.version);
+            return res.send(buffer);
+        }
+
         const buffer = await canvas.toBuffer('image/png');
         res.type('image/png');
         res.setHeader('Cache-Control', 'no-store');
@@ -715,7 +786,22 @@ app.post('/api/read', rawParser, async (req, res) => {
         const luminanceSource = new RGBLuminanceSource(luminancePoints, imageData.width, imageData.height);
         const binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
 
-        const result = reader.decode(binaryBitmap);
+        let result;
+        try {
+            result = reader.decode(binaryBitmap);
+        } catch (firstPassError) {
+            // Dark-mode themes (cyber, tokyonight, neon, glitch) render module fill
+            // brighter than the background, which inverts luminance polarity relative
+            // to the black-on-white assumption every QR decoder makes. Retry once
+            // with luminance inverted before giving up.
+            const invertedPoints = new Uint8ClampedArray(argbLen);
+            for (let i = 0; i < argbLen; i++) {
+                invertedPoints[i] = 255 - luminancePoints[i];
+            }
+            const invertedSource = new RGBLuminanceSource(invertedPoints, imageData.width, imageData.height);
+            const invertedBitmap = new BinaryBitmap(new HybridBinarizer(invertedSource));
+            result = reader.decode(invertedBitmap); // let this throw into the existing catch block if it also fails
+        }
 
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('QR-Codify-Format', result.getBarcodeFormat().toString());
@@ -753,15 +839,23 @@ app.post('/api/read', rawParser, async (req, res) => {
     }
 });
 
-function shouldCompress (req, res) {
-  if (req.headers['x-no-compression']) {
-    // don't compress responses with this request header
-    return false
-  }
+function shouldCompress(req, res) {
+    if (req.headers['x-no-compression']) {
+        // don't compress responses with this request header
+        return false
+    }
 
-  // fallback to standard filter function
-  return compression.filter(req, res)
+    // fallback to standard filter function
+    return compression.filter(req, res)
 }
+
+app.get("/api/health", (req, res) => {
+    return res.status(200).json({
+        status: 'success',
+        message: 'Server is healthy and running.',
+        version: packageJson.version
+    })
+})
 
 app.use((req, res, next) => {
     if (req.originalUrl.startsWith('/api')) {

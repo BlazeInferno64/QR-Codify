@@ -5,12 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="shortcut icon" href="/logo" type="image/x-icon">
-  <title>QR Codify — Free, Open Source QR Code Generator & Scanner</title>
+  <title>QR Codify — Free, Open Source QR Code Generator & Scanner | QR Codes done right!</title>
   <meta name="description"
-    content="Generate and scan QR codes instantly. No data stored, 100% free and open source. Themed QR codes with a clean REST API for developers." />
+    content="Generate and scan QR codes instantly. No data stored, 100% free and open source. Themed QR codes with a clean REST API for developers. QR Codes done right!" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <link rel="stylesheet"
@@ -18,6 +19,42 @@
   <style>
     :root {
       color-scheme: dark;
+
+      /* ---- Material 3 dark scheme, tuned to the QR Codify brand hues ---- */
+      --md-surface-dim: #0b0a0f;
+      --md-surface: #131218;
+      --md-surface-container-low: #19171f;
+      --md-surface-container: #1e1c25;
+      --md-surface-container-high: #26232e;
+      --md-surface-container-highest: #302d3a;
+
+      --md-on-surface: #e7e1ec;
+      --md-on-surface-variant: #a8a2b3;
+      --md-outline: rgba(231, 225, 236, 0.14);
+      --md-outline-variant: rgba(231, 225, 236, 0.08);
+
+      --md-primary: #b7c3ff;
+      --md-on-primary: #16215f;
+      --md-primary-container: #2e3480;
+      --md-on-primary-container: #dee1ff;
+
+      --md-tertiary: #7ddbec;
+      --md-on-tertiary: #003640;
+      --md-tertiary-container: #063e46;
+      --md-on-tertiary-container: #b6ebf9;
+
+      --md-success: #94d9a4;
+      --md-success-container: #0f3a1e;
+      --md-warning: #f6cf7a;
+      --md-warning-container: #402d05;
+      --md-error: #ffb0ac;
+      --md-error-container: #4a1615;
+
+      --shape-xs: 8px;
+      --shape-sm: 12px;
+      --shape-md: 16px;
+      --shape-lg: 20px;
+      --shape-xl: 28px;
     }
 
     *,
@@ -33,11 +70,15 @@
 
     body {
       overflow-x: hidden;
-      background:
-        radial-gradient(ellipse 80% 40% at 50% -5%, rgba(99, 102, 241, 0.18), transparent),
-        linear-gradient(160deg, #030810 0%, #060e1c 55%, #020611 100%);
-      color: #e2e8f0;
-      font-family: "Geist Mono", "Segoe UI", Arial, sans-serif;
+      background: var(--md-surface-dim);
+      color: var(--md-on-surface);
+      font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+      padding-top: 64px;
+    }
+
+    code,
+    .font-mono {
+      font-family: "Geist Mono", monospace;
     }
 
     .material-symbols-outlined {
@@ -47,112 +88,114 @@
       justify-content: center;
       vertical-align: middle;
       line-height: 1;
+      font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0;
     }
 
-    /* Ambient orbs */
+    /* ============ Top app bar ============ */
+    .md-app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 1030;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(14px, 4vw, 32px);
+      background: rgba(20, 18, 26, 0.92);
+      backdrop-filter: saturate(160%) blur(10px);
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+
+    .md-app-bar__brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--md-on-surface);
+      text-decoration: none;
+    }
+
+    .md-app-bar__mark {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--shape-sm);
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .md-app-bar__actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .md-icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-on-surface-variant);
+      background: transparent;
+      border: none;
+      transition: background 140ms ease, color 140ms ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .md-icon-btn:hover {
+      background: rgba(231, 225, 236, 0.08);
+      color: var(--md-on-surface);
+    }
+
+    /* ============ Ambient orbs (kept subtle, behind the tonal surfaces) ============ */
     .orb {
       position: fixed;
       border-radius: 50%;
-      filter: blur(90px);
+      filter: blur(100px);
       z-index: -1;
       pointer-events: none;
-      animation: orbFloat 12s ease-in-out infinite;
     }
 
     .orb-1 {
-      width: 260px;
-      height: 260px;
-      top: -50px;
-      right: -50px;
-      background: #8b5cf6;
-      opacity: 0.08;
+      width: 320px;
+      height: 320px;
+      top: -60px;
+      right: -60px;
+      background: #6366f1;
+      opacity: 0.10;
     }
 
     .orb-2 {
-      width: 200px;
-      height: 200px;
-      bottom: -50px;
-      left: -50px;
-      background: #22d3ee;
+      width: 260px;
+      height: 260px;
+      bottom: -60px;
+      left: -60px;
+      background: #7ddbec;
       opacity: 0.06;
-      animation-delay: -5s;
     }
 
-    .orb-3 {
-      width: 150px;
-      height: 150px;
-      top: 45%;
-      left: 45%;
-      background: #6366f1;
-      opacity: 0.04;
-      animation-delay: -2.5s;
-    }
-
-    @media(min-width: 768px) {
-      .orb-1 {
-        width: 380px;
-        height: 380px;
-        top: -100px;
-        right: -100px;
-        opacity: 0.12;
-      }
-
-      .orb-2 {
-        width: 280px;
-        height: 280px;
-        bottom: -80px;
-        left: -80px;
-        opacity: 0.10;
-      }
-
-      .orb-3 {
-        width: 220px;
-        height: 220px;
+    @media(prefers-reduced-motion:no-preference) {
+      .fade-up {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: rise 0.5s cubic-bezier(.2, .7, .2, 1) forwards;
       }
     }
 
-    @keyframes orbFloat {
-
-      0%,
-      100% {
-        transform: translateY(0) scale(1);
-      }
-
-      50% {
-        transform: translateY(-20px) scale(1.04);
-      }
-    }
-
-    /* Animations */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(22px);
-      animation: rise 0.7s cubic-bezier(.22, .68, 0, 1.1) forwards;
-    }
-
-    .delay-1 {
-      animation-delay: .08s;
-    }
-
-    .delay-2 {
-      animation-delay: .16s;
-    }
-
-    .delay-3 {
-      animation-delay: .24s;
-    }
-
-    .delay-4 {
-      animation-delay: .32s;
-    }
-
-    .delay-5 {
-      animation-delay: .40s;
-    }
-
-    .delay-6 {
-      animation-delay: .50s;
-    }
+    .delay-1 { animation-delay: .05s; }
+    .delay-2 { animation-delay: .10s; }
+    .delay-3 { animation-delay: .15s; }
+    .delay-4 { animation-delay: .20s; }
 
     @keyframes rise {
       to {
@@ -161,202 +204,266 @@
       }
     }
 
-    /* Cards */
-    .glass-card {
-      background: rgba(15, 23, 42, 0.78);
-      border: 1px solid rgba(148, 163, 184, 0.16);
-      border-radius: 20px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-      transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    /* ============ Surfaces (elevation via tone, not blur/shadow-stacking) ============ */
+    .md-surface {
+      background: var(--md-surface-container);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-xl);
+      position: relative;
     }
 
-    @media(min-width: 768px) {
-      .glass-card {
-        border-radius: 24px;
-        box-shadow: 0 20px 56px rgba(0, 0, 0, 0.38);
-      }
+    .md-surface--elevated {
+      background: var(--md-surface-container-high);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.28);
     }
 
-    .glass-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(129, 140, 248, 0.38);
-      box-shadow: 0 24px 52px rgba(99, 102, 241, 0.14);
+    .md-card {
+      background: var(--md-surface-container-low);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-md);
+      transition: background 160ms ease, border-color 160ms ease;
+      position: relative;
     }
 
-    .mini-card {
-      border: 1px solid rgba(148, 163, 184, 0.16);
-      border-radius: 14px;
-      background: rgba(15, 23, 42, 0.70);
-      transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    .md-card:hover {
+      background: var(--md-surface-container);
+      border-color: var(--md-outline);
     }
 
-    .mini-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(129, 140, 248, 0.36);
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+    .md-card--tight {
+      border-radius: var(--shape-sm);
     }
 
-    /* Trust pills */
-    .trust-pill {
+    /* ============ Labels (sentence case, tonal — not tracked all-caps) ============ */
+    .md-label {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--md-primary);
+      margin-bottom: 8px;
+    }
+
+    /* ============ Section headers (enhanced styling) ============ */
+    .md-section-header {
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 2.5rem;
+      letter-spacing: -0.015em;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 16px;
+      text-transform: capitalize;
+    }
+
+    .md-section-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      border-radius: 2px;
+    }
+
+    .md-headline {
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .grad-text {
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ============ Chips (M3 assist chips, replacing dot-separated pills) ============ */
+    .md-chip {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: .03em;
-      padding: 4px 10px;
+      font-size: .78rem;
+      font-weight: 500;
+      padding: 7px 14px 7px 10px;
       border-radius: 999px;
-      border: 1px solid;
+      border: 1px solid var(--md-outline);
+      color: var(--md-on-surface-variant);
+      background: var(--md-surface-container-high);
       white-space: nowrap;
     }
 
-    @media(min-width: 576px) {
-      .trust-pill {
-        font-size: 0.72rem;
-        padding: 5px 13px;
+    .md-chip .material-symbols-outlined {
+      font-size: 1.05rem;
+    }
+
+    .chip-tone-success { color: var(--md-success); border-color: rgba(148, 217, 164, 0.3); background: rgba(148, 217, 164, 0.08); }
+    .chip-tone-primary { color: var(--md-primary); border-color: rgba(183, 195, 255, 0.3); background: rgba(183, 195, 255, 0.08); }
+    .chip-tone-tertiary { color: var(--md-tertiary); border-color: rgba(125, 219, 236, 0.3); background: rgba(125, 219, 236, 0.08); }
+    .chip-tone-warning { color: var(--md-warning); border-color: rgba(246, 207, 122, 0.3); background: rgba(246, 207, 122, 0.08); }
+
+    /* ============ Buttons (M3 shapes: filled / tonal / outlined / text) ============ */
+    .md-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-weight: 500;
+      font-size: .92rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .md-btn .material-symbols-outlined {
+      font-size: 1.2rem;
+    }
+
+    .md-btn--filled {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .md-btn--filled:hover {
+      filter: brightness(1.08);
+      color: #fff;
+    }
+
+    .md-btn--tonal {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+
+    .md-btn--tonal:hover {
+      background: #383e94;
+      color: var(--md-on-primary-container);
+    }
+
+    .md-btn--outlined {
+      background: transparent;
+      color: var(--md-on-surface);
+      border: 1px solid var(--md-outline);
+    }
+
+    .md-btn--outlined:hover {
+      background: rgba(231, 225, 236, 0.08);
+      color: var(--md-on-surface);
+    }
+
+    .md-btn--text {
+      background: transparent;
+      color: var(--md-primary);
+      height: 44px;
+      padding: 0 16px;
+    }
+
+    .md-btn--text:hover {
+      background: rgba(183, 195, 255, 0.08);
+      color: var(--md-primary);
+    }
+
+    .md-btn--sm {
+      height: 40px;
+      padding: 0 18px;
+      font-size: .84rem;
+    }
+
+    .md-btn--block {
+      width: 100%;
+    }
+
+    /* ============ Ripple effect ============ */
+    .md-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      pointer-events: none;
+    }
+
+    @keyframes ripple-expand {
+      to {
+        transform: scale(4);
+        opacity: 0;
       }
     }
 
-    .tp-green {
-      background: rgba(34, 197, 94, 0.10);
-      border-color: rgba(34, 197, 94, 0.28);
-      color: #4ade80;
+    .md-ripple.active {
+      animation: ripple-expand 900ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .tp-violet {
-      background: rgba(139, 92, 246, 0.10);
-      border-color: rgba(139, 92, 246, 0.28);
-      color: #a78bfa;
+    /* ============ Stat strip ============ */
+    .md-stat {
+      padding: 18px 8px;
     }
 
-    .tp-cyan {
-      background: rgba(34, 211, 238, 0.10);
-      border-color: rgba(34, 211, 238, 0.28);
-      color: #67e8f9;
-    }
-
-    .tp-amber {
-      background: rgba(251, 191, 36, 0.10);
-      border-color: rgba(251, 191, 36, 0.28);
-      color: #fcd34d;
-    }
-
-    .tp-pink {
-      background: rgba(236, 72, 153, 0.10);
-      border-color: rgba(236, 72, 153, 0.28);
-      color: #f472b6;
-    }
-
-    .tp-red {
-      background: rgba(255, 0, 85, 0.10);
-      border-color: rgba(255, 0, 85, 0.28);
-      color: #ff4d88;
-    }
-
-    /* Eyebrow labels */
-    .eyebrow {
-      font-size: .66rem;
-      font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: #67e8f9;
-      margin-bottom: 10px;
-    }
-
-    /* Gradient text */
-    .grad-text {
-      background: linear-gradient(90deg, #818cf8, #67e8f9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* Badge pill */
-    .soft-pill {
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.26);
-      color: #a5b4fc;
-      font-size: .68rem;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    /* Buttons */
-    .btn-primary-custom {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border: none;
-      color: #fff;
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.30);
-      transition: filter 160ms, box-shadow 160ms, transform 120ms;
-    }
-
-    .btn-primary-custom:hover {
-      filter: brightness(1.09);
-      color: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.42);
-    }
-
-    .btn-primary-custom:active {
-      transform: translateY(0);
-    }
-
-    /* Stat numbers */
-    .stat-num {
-      font-size: 1.8rem;
+    .md-stat__num {
+      font-size: 1.9rem;
       font-weight: 900;
       line-height: 1;
-      background: linear-gradient(135deg, #a5b4fc, #67e8f9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--md-primary);
     }
 
     @media(min-width: 768px) {
-      .stat-num {
-        font-size: 2.2rem;
+      .md-stat__num { font-size: 2.3rem; }
+    }
+
+    @media(max-width: 768px) {
+      .md-section-header {
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
+        margin-bottom: 1.5rem;
+        padding-bottom: 12px;
+      }
+
+      .md-section-header::after {
+        height: 3px;
       }
     }
 
-    /* Method badges */
-    .method {
-      font-size: .64rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 6px;
-      margin-right: 6px;
-      flex-shrink: 0;
+    .md-stat__label {
+      font-size: .78rem;
+      color: var(--md-on-surface-variant);
+      margin-top: 6px;
     }
 
-    .m-get {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-    }
-
-    .m-post {
-      background: rgba(99, 102, 241, 0.18);
-      color: #a5b4fc;
-    }
-
-    /* Feature icon box */
-    .feat-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 13px;
+    /* ============ Feature icon avatar (M3 icon-container pattern) ============ */
+    .md-icon-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--shape-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       flex-shrink: 0;
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
     }
 
-    /* QR preview box */
+    .md-icon-avatar .material-symbols-outlined {
+      font-size: 1.4rem;
+    }
+
+    .icon-avatar--tertiary { background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
+    .icon-avatar--success { background: var(--md-success-container); color: var(--md-success); }
+    .icon-avatar--warning { background: var(--md-warning-container); color: var(--md-warning); }
+
+    /* ============ QR preview box ============ */
     .qr-box {
-      background: linear-gradient(135deg, #0c1222, #111827);
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      border-radius: 16px;
+      background: var(--md-surface-container-highest);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-lg);
       padding: 16px;
       display: flex;
       justify-content: center;
@@ -365,7 +472,7 @@
     }
 
     .qr-box img {
-      border-radius: 10px;
+      border-radius: var(--shape-sm);
       display: block;
       margin: auto;
       width: 100%;
@@ -373,7 +480,6 @@
       max-width: 100%;
     }
 
-    /* Theme dot */
     .tdot {
       width: 9px;
       height: 9px;
@@ -382,69 +488,219 @@
       margin-right: 5px;
     }
 
-    .sdiv {
-      border: none;
-      border-top: 1px solid rgba(148, 163, 184, 0.12);
-      margin: 0;
+    /* ============ Method badges ============ */
+    .method {
+      font-size: .64rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 6px;
+      margin-right: 6px;
+      flex-shrink: 0;
     }
 
-    .privacy-icon {
-      font-size: 1.75rem;
-      margin-bottom: 6px;
+    .m-get { background: rgba(148, 217, 164, 0.16); color: var(--md-success); }
+    .m-post { background: rgba(183, 195, 255, 0.18); color: var(--md-primary); }
+
+    /* ============ API Endpoint Cards ============ */
+    .api-endpoint {
+      background: linear-gradient(135deg, rgba(183, 195, 255, 0.06) 0%, rgba(125, 219, 236, 0.04) 100%);
+      border: 1px solid rgba(183, 195, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Forms */
+    .api-endpoint::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      opacity: 0.6;
+    }
+
+    .api-endpoint:hover {
+      background: linear-gradient(135deg, rgba(183, 195, 255, 0.1) 0%, rgba(125, 219, 236, 0.08) 100%);
+      border-color: rgba(183, 195, 255, 0.24);
+      box-shadow: 0 8px 24px rgba(183, 195, 255, 0.08);
+    }
+
+    .api-endpoint__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .api-endpoint__method-path {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .api-endpoint__endpoint-code {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--md-tertiary);
+      word-break: break-all;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .api-endpoint__badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .api-endpoint__description {
+      font-size: 0.75rem;
+      color: var(--md-on-surface-variant);
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .api-endpoint__description code {
+      font-family: 'Geist Mono', monospace;
+      font-size: 0.75rem;
+      background: rgba(183, 195, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(183, 195, 255, 0.12);
+    }
+
+    .api-endpoint__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(183, 195, 255, 0.1);
+      color: var(--md-primary);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .api-endpoint__return {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--md-tertiary);
+      padding: 3px 8px;
+      background: rgba(125, 219, 236, 0.08);
+      border: 1px solid rgba(125, 219, 236, 0.16);
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    @media(max-width: 576px) {
+      .api-endpoint {
+        padding: 14px;
+      }
+
+      .api-endpoint__endpoint-code {
+        font-size: 0.75rem;
+      }
+
+      .api-endpoint__description {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* ============ API Modal Tabs ============ */
+    .api-tab-btn {
+      position: relative;
+    }
+
+    .api-tab-btn.active {
+      border: 2px solid var(--md-primary) !important;
+      border-radius: 8px;
+      margin-bottom: 0 !important;
+    }
+
+    /* ============ Forms (M3 outlined text fields) ============ */
     .form-control,
     .form-select {
-      background: rgba(15, 23, 42, 0.65) !important;
-      border: 1px solid rgba(148, 163, 184, 0.26) !important;
-      color: #e2e8f0 !important;
-      border-radius: 10px !important;
+      background: var(--md-surface-container-highest) !important;
+      border: 1px solid var(--md-outline) !important;
+      color: var(--md-on-surface) !important;
+      border-radius: var(--shape-xs) !important;
     }
 
     .form-control::placeholder {
-      color: rgba(226, 232, 240, 0.38);
+      color: var(--md-on-surface-variant);
+      opacity: .7;
     }
 
     .form-control:focus,
     .form-select:focus {
-      border-color: #6366f1 !important;
-      box-shadow: 0 0 0 .2rem rgba(99, 102, 241, 0.2) !important;
+      border-color: var(--md-primary) !important;
+      box-shadow: 0 0 0 .2rem rgba(183, 195, 255, 0.18) !important;
     }
 
     .form-select option {
-      background: #0f172a;
+      background: var(--md-surface-container-high);
+    }
+
+    .form-label {
+      font-size: .8rem;
+      color: var(--md-on-surface-variant);
     }
 
     footer {
-      border-top: 1px solid rgba(148, 163, 184, 0.12);
+      border-top: 1px solid var(--md-outline-variant);
+      background: var(--md-surface-container-low);
     }
 
     footer a {
       transition: color 150ms;
+      color: var(--md-on-surface-variant) !important;
+      text-decoration: none;
     }
 
     footer a:hover {
-      color: #a5b4fc !important;
+      color: var(--md-primary) !important;
     }
 
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1px;
+    /* ============ Modals restyled as M3 dialogs ============ */
+    .modal-content {
+      background: var(--md-surface-container-high) !important;
+      color: var(--md-on-surface) !important;
+      border-radius: var(--shape-xl) !important;
+      border: 1px solid var(--md-outline-variant) !important;
     }
 
-    /* ── MOBILE RESPONSIVE MODAL OPTIMIZATIONS ── */
+    .modal-header,
+    .modal-footer {
+      border-color: var(--md-outline-variant) !important;
+    }
+
+    .modal-title {
+      font-weight: 700;
+    }
+
     @media (max-width: 576px) {
       .modal-dialog.modal-fullscreen-sm-down {
-        margin: 0;
-        max-width: 100%;
+        margin: 0.5rem auto;
+        max-width: 450px;
       }
 
       .modal-dialog.modal-fullscreen-sm-down .modal-content {
-        border-radius: 0 !important;
-        min-height: 100vh;
+        border-radius: var(--shape-md) !important;
+        min-height: auto;
       }
 
       .modal-body {
@@ -452,22 +708,98 @@
       }
 
       .modal-header .modal-title {
-        font-size: 1.15rem !important;
+        font-size: 1.1rem !important;
+      }
+
+      /* Mobile-specific modal optimizations */
+      .modal-header {
+        padding: 0.75rem 1rem !important;
+      }
+
+      .modal-footer {
+        padding: 0.75rem !important;
+        flex-direction: column;
+      }
+
+      .modal-body {
+        padding: 0.75rem !important;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+      }
+
+      /* Stack buttons vertically on mobile */
+      .modal-footer .row {
+        flex-direction: column;
+      }
+
+      .modal-footer .col-12,
+      .modal-footer .col-sm-4 {
+        width: 100% !important;
+        padding: 0.25rem !important;
+        margin: 0 !important;
+      }
+
+      .modal-footer .md-btn {
+        width: 100%;
+        height: 44px;
+        font-size: 0.88rem;
+      }
+
+      /* Reduce font sizes in modal content */
+      .modal-body .form-label {
+        font-size: 0.75rem !important;
+      }
+
+      .modal-body .form-control,
+      .modal-body .form-select {
+        font-size: 0.9rem !important;
+        padding: 0.5rem 0.75rem !important;
+      }
+
+      .modal-body textarea.form-control {
+        min-height: 80px !important;
+        font-size: 0.85rem !important;
+      }
+
+      .modal-body .md-card {
+        padding: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+
+      .modal-body .md-label {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      .modal-body .qr-box {
+        padding: 12px !important;
+        max-width: 200px !important;
+      }
+
+      /* Optimize modal dialogs height */
+      .modal-dialog.modal-lg {
+        max-width: calc(100% - 1rem);
+        margin: 0.5rem auto;
+      }
+
+      .modal-dialog.modal-xl {
+        max-width: calc(100% - 1rem);
+        margin: 0.5rem auto;
       }
     }
 
-    /* Code highlights scroll isolation wrapper */
     .api-code-wrapper {
       position: relative;
       width: 100%;
-      background: #090d16;
-      border-radius: 10px;
+      background: var(--md-surface-dim);
+      border-radius: var(--shape-sm);
       overflow: hidden;
+      border: 1px solid var(--md-outline-variant);
     }
 
     .api-code-wrapper pre {
       margin: 0 !important;
-      padding: 12px !important;
+      padding: 14px !important;
       overflow-x: auto !important;
       white-space: pre !important;
       word-break: normal !important;
@@ -478,22 +810,26 @@
 
     .api-code-wrapper code {
       font-size: 0.75rem !important;
-      line-height: 1.5 !important;
+      line-height: 1.55 !important;
       font-family: "Geist Mono", monospace !important;
     }
 
-    /* Custom safe styling constraints for scan results */
     #scanResult {
       font-size: 0.78rem;
       max-height: 160px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-all;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 10px;
-      border-radius: 8px;
+      background: var(--md-surface-dim);
+      padding: 12px;
+      border-radius: var(--shape-xs);
       font-family: "Geist Mono", monospace;
-      color: rgba(226, 232, 240, 0.7);
+      color: var(--md-on-surface-variant);
+      border: 1px solid var(--md-outline-variant);
+    }
+
+    .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
     }
 
     @media(prefers-reduced-motion:reduce) {
@@ -512,82 +848,91 @@
 
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
 
-  <main class="container py-3 py-md-5">
+  <header class="md-app-bar">
+    <a href="/" class="md-app-bar__brand">
+      <span class="md-app-bar__mark">
+        <span class="material-symbols-outlined" style="font-size:1.15rem;">qr_code_2</span>
+      </span>
+      QR Codify
+    </a>
+    <div class="md-app-bar__actions">
+      <button id="openApiExampleBtnTop" type="button" class="md-icon-btn" title="API example">
+        <span class="material-symbols-outlined">api</span>
+      </button>
+      <a class="md-icon-btn" href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer" title="View on GitHub">
+        <span class="material-symbols-outlined">code</span>
+      </a>
+    </div>
+  </header>
 
-    <section class="glass-card p-3 p-sm-4 p-md-5 mb-4 fade-up">
+  <main class="container py-4 py-md-5">
+
+    <section class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up">
       <div class="row align-items-center g-4">
         <div class="col-lg-7 text-center text-lg-start">
-          <span class="soft-pill badge rounded-pill px-3 py-2 mb-3 d-inline-block">
-            Free &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; No Sign-up
-          </span>
-          <h1 class="display-6 display-md-5 fw-bold text-white mb-3 lh-sm">
-            QR codes done right<br>
-            <span class="grad-text">fast, private and free!</span>
+          <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2 mb-3">
+            <span class="md-chip chip-tone-success"><span class="material-symbols-outlined">bolt</span>Free</span>
+            <span class="md-chip chip-tone-primary"><span class="material-symbols-outlined">code</span>Open source</span>
+            <span class="md-chip chip-tone-tertiary"><span class="material-symbols-outlined">person_off</span>No sign-up</span>
+          </div>
+          <h1 class="display-6 display-md-5 md-headline text-white mb-3 lh-sm">
+            QR Codes done right<br>
+            <span class="grad-text">Fast, Private and Free!</span>
           </h1>
-          <p class="mb-4 small-text" style="color:rgba(226,232,240,0.72); font-size:1rem; line-height:1.6;">
+          <p class="mb-4" style="color:var(--md-on-surface-variant); font-size:1rem; line-height:1.6;">
             Generate styled QR codes and decode images in seconds. No sign-up, no tracking, no data retention — your
             content is processed in memory and discarded the moment the image is sent back to you.
           </p>
 
-          <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2 mb-4">
-            <span class="trust-pill tp-green">🔒 Zero data stored</span>
-            <span class="trust-pill tp-violet">⚡ Instant generation</span>
-            <span class="trust-pill tp-cyan">🌐 REST API included</span>
-            <span class="trust-pill tp-amber">🆓 100% free forever</span>
-            <span class="trust-pill tp-pink">🔓 Open source</span>
-          </div>
-
-          <div
-            class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-2.5 gap-sm-3 mb-4">
-            <button type="button" class="btn btn-primary-custom btn-lg px-4 py-2.5 fw-semibold w-100 w-sm-auto"
+          <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-2 mb-4">
+            <button type="button" class="md-btn md-btn--filled md-btn--block w-sm-auto"
               data-bs-toggle="modal" data-bs-target="#generateModal">
-              <i class="material-symbols-outlined">qr_code_2</i> Generate QR
+              <span class="material-symbols-outlined">qr_code_2</span> Generate QR
             </button>
-            <br>
-            <button type="button" class="btn btn-outline-light btn-lg px-4 py-2.5 w-100 w-sm-auto"
+            <button type="button" class="md-btn md-btn--outlined md-btn--block w-sm-auto"
               data-bs-toggle="modal" data-bs-target="#scanModal">
-              <i class="material-symbols-outlined">qr_code_scanner</i> Scan QR
+              <span class="material-symbols-outlined">qr_code_scanner</span> Scan QR
             </button>
-            <br>
-            <button id="openApiExampleBtn" type="button" class="btn btn-lg px-4 py-2.5 w-100 w-sm-auto"
-              style="color:#67e8f9;border:1px solid rgba(34,211,238,0.35);background:rgba(34,211,238,0.06);">
-              <i class="material-symbols-outlined">api</i>
-              API
-              Example</button>
+            <button id="openApiExampleBtn" type="button" class="md-btn md-btn--tonal md-btn--block w-sm-auto">
+              <span class="material-symbols-outlined">api</span> API example
+            </button>
           </div>
 
           <ul class="list-unstyled small mb-0 text-start d-inline-block text-lg-start"
-            style="color:rgba(226,232,240,0.55);">
-            <li class="mb-1"><span style="color:#4ade80;">✓</span>&nbsp; No account, no email — just open and use</li>
-            <li class="mb-1"><span style="color:#4ade80;">✓</span>&nbsp; <%- themeWord %> premium visual themes: Cyber,
-                Tokyo Night, Neon Lime, Glitch Matrix</li>
-            <li class="mb-1"><span style="color:#4ade80;">✓</span>&nbsp; Developer API — one request returns a PNG</li>
-            <li class="mb-0"><span style="color:#4ade80;">✓</span>&nbsp; Full source on GitHub — inspect, fork,
-              self-host</li>
+            style="color:var(--md-on-surface-variant);">
+            <li class="mb-2 d-flex align-items-center gap-2"><span class="material-symbols-outlined" style="font-size:1.05rem;color:var(--md-success);">check_circle</span> No account, no email — just open and use</li>
+            <li class="mb-2 d-flex align-items-center gap-2"><span class="material-symbols-outlined" style="font-size:1.05rem;color:var(--md-success);">check_circle</span> <%- themeWord %> premium visual themes: Cyber, Tokyo Night, Neon Lime, Glitch Matrix</li>
+            <li class="mb-2 d-flex align-items-center gap-2"><span class="material-symbols-outlined" style="font-size:1.05rem;color:var(--md-success);">check_circle</span> Developer API — one request returns a PNG</li>
+            <li class="mb-0 d-flex align-items-center gap-2"><span class="material-symbols-outlined" style="font-size:1.05rem;color:var(--md-success);">check_circle</span> Full source on GitHub — inspect, fork, self-host</li>
           </ul>
         </div>
 
         <div class="col-lg-5">
-          <div class="mini-card p-3 p-sm-4 text-center">
-            <div class="eyebrow text-center">Live Preview</div>
+          <div class="md-card p-3 p-sm-4 text-center">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+              <span class="material-symbols-outlined" style="font-size: 1.15rem; color: var(--md-primary);">visibility</span>
+              <div class="md-label mb-0" style="font-weight: 700; letter-spacing: 0.02em;">Live Preview</div>
+            </div>
+            <p class="small mb-3" style="color: var(--md-on-surface-variant); font-size: 0.82rem; line-height: 1.5;">
+              Instantly preview custom styles, colors, and live QR layouts before downloading or deploying.
+            </p>
             <div class="qr-box mb-3 mx-auto" style="max-width: 320px;">
               <img
                 src="/api/generate?data=QR%20Codify%20%E2%80%94%20made%20with%20%E2%9D%A4%EF%B8%8F%20by%20BlazeInferno64.%20Visit%3A%20https%3A%2F%2Fgithub.com%2Fblazeinferno64%2FQR-Codify&theme=<%- previewTheme  %>&size=500x500"
                 alt="QR code preview" class="img-fluid" />
             </div>
             <div class="d-flex justify-content-center gap-2 flex-wrap">
-              <span class="trust-pill tp-cyan" style="font-size:.67rem;">
+              <span class="md-chip" style="font-size:.7rem;padding:5px 10px 5px 8px;">
                 <span class="tdot" style="background:linear-gradient(135deg,#3b82f6,#ec4899);"></span>Cyber
               </span>
-              <span class="trust-pill tp-violet" style="font-size:.67rem;">
+              <span class="md-chip" style="font-size:.7rem;padding:5px 10px 5px 8px;">
                 <span class="tdot" style="background:linear-gradient(135deg,#7aa2f7,#f7768e);"></span>Tokyo Night
               </span>
-              <span class="trust-pill tp-green" style="font-size:.67rem;">
+              <span class="md-chip" style="font-size:.7rem;padding:5px 10px 5px 8px;">
                 <span class="tdot" style="background:linear-gradient(180deg,#00ffcc,#99ff00);"></span>Neon
               </span>
-              <span class="trust-pill tp-red" style="font-size:.67rem;">
+              <span class="md-chip" style="font-size:.7rem;padding:5px 10px 5px 8px;">
                 <span class="tdot" style="background:linear-gradient(180deg,#ff0055,#00ffaa);"></span>Glitch
               </span>
             </div>
@@ -596,117 +941,113 @@
       </div>
     </section>
 
-    <section class="glass-card p-3 p-sm-4 mb-4 fade-up delay-1">
-      <div class="row g-3 text-center">
-        <div class="col-6 col-md-3">
-          <div class="stat-num">0</div>
-          <div class="small mt-1 mt-sm-2" style="color:rgba(226,232,240,0.5); font-size: 0.78rem;">bytes of user<br>data
-            stored</div>
+    <section class="md-surface p-3 p-sm-4 mb-4 fade-up delay-1">
+      <div class="row g-2 text-center">
+        <div class="col-6 col-md-3 md-stat">
+          <div class="md-stat__num">0</div>
+          <div class="md-stat__label">bytes of user data stored</div>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-num"><%- themeNum %></div>
-          <div class="small mt-1 mt-sm-2" style="color:rgba(226,232,240,0.5); font-size: 0.78rem;">premium
-            visual<br>themes</div>
+        <div class="col-6 col-md-3 md-stat">
+          <div class="md-stat__num"><%- themeNum %></div>
+          <div class="md-stat__label">premium visual themes</div>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-num">1</div>
-          <div class="small mt-1 mt-sm-2" style="color:rgba(226,232,240,0.5); font-size: 0.78rem;">API call to get<br>a
-            QR image</div>
+        <div class="col-6 col-md-3 md-stat">
+          <div class="md-stat__num">1</div>
+          <div class="md-stat__label">API call to get a QR image</div>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-num">∞</div>
-          <div class="small mt-1 mt-sm-2" style="color:rgba(226,232,240,0.5); font-size: 0.78rem;">free forever,<br>no
-            rate-wall</div>
+        <div class="col-6 col-md-3 md-stat">
+          <div class="md-stat__num">∞</div>
+          <div class="md-stat__label">free forever, no rate-wall</div>
         </div>
       </div>
     </section>
 
     <section class="mb-4">
-      <div class="eyebrow text-center fade-up delay-1">Why QR Codify</div>
+      <div class="md-section-header text-center fade-up delay-1">Why QR Codify</div>
       <div class="row g-3">
         <article class="col-md-6 col-xl-3 fade-up delay-1">
-          <div class="mini-card p-4 h-100">
-            <div class="feat-icon" style="background:rgba(99,102,241,0.13);">🔒</div>
+          <div class="md-card p-4 h-100">
+            <div class="md-icon-avatar"><span class="material-symbols-outlined">lock</span></div>
             <h2 class="h6 fw-bold text-white mb-2">Private by design</h2>
-            <p class="small mb-0" style="color:rgba(226,232,240,0.58);line-height:1.65;">Your URLs and text are
+            <p class="small mb-0" style="color:var(--md-on-surface-variant);line-height:1.65;">Your URLs and text are
               processed in-memory and discarded immediately. Nothing is logged, stored, or sold. Ever.</p>
           </div>
         </article>
         <article class="col-md-6 col-xl-3 fade-up delay-2">
-          <div class="mini-card p-4 h-100">
-            <div class="feat-icon" style="background:rgba(34,211,238,0.10);">⚡</div>
+          <div class="md-card p-4 h-100">
+            <div class="md-icon-avatar icon-avatar--tertiary"><span class="material-symbols-outlined">bolt</span></div>
             <h2 class="h6 fw-bold text-white mb-2">Instant generation</h2>
-            <p class="small mb-0" style="color:rgba(226,232,240,0.58);line-height:1.65;">Server-side canvas rendering
+            <p class="small mb-0" style="color:var(--md-on-surface-variant);line-height:1.65;">Server-side canvas rendering
               delivers a crisp PNG in milliseconds — no third-party QR service, no redirects.</p>
           </div>
         </article>
         <article class="col-md-6 col-xl-3 fade-up delay-3">
-          <div class="mini-card p-4 h-100">
-            <div class="feat-icon" style="background:rgba(139,92,246,0.12);">🎨</div>
+          <div class="md-card p-4 h-100">
+            <div class="md-icon-avatar"><span class="material-symbols-outlined">palette</span></div>
             <h2 class="h6 fw-bold text-white mb-2">Themed visuals</h2>
-            <p class="small mb-0" style="color:rgba(226,232,240,0.58);line-height:1.65;">Cyber gradient, Tokyo Night,
+            <p class="small mb-0" style="color:var(--md-on-surface-variant);line-height:1.65;">Cyber gradient, Tokyo Night,
               Neon Lime and Glitch Matrix — custom finder patterns and gradient fills that actually look good.</p>
           </div>
         </article>
         <article class="col-md-6 col-xl-3 fade-up delay-4">
-          <div class="mini-card p-4 h-100">
-            <div class="feat-icon" style="background:rgba(34,197,94,0.10);">🛠️</div>
-            <h2 class="h6 fw-bold text-white mb-2">Developer First API</h2>
-            <p class="small mb-0" style="color:rgba(226,232,240,0.58);line-height:1.65;">One GET or POST to <code
-                style="color:#a5b4fc;">/api/generate</code> returns a PNG. Pass <code
-                style="color:#a5b4fc;">data</code>, <code style="color:#a5b4fc;">theme</code>, <code
-                style="color:#a5b4fc;">size</code> — done.</p>
+          <div class="md-card p-4 h-100">
+            <div class="md-icon-avatar icon-avatar--success"><span class="material-symbols-outlined">terminal</span></div>
+            <h2 class="h6 fw-bold text-white mb-2">Developer first API</h2>
+            <p class="small mb-0" style="color:var(--md-on-surface-variant);line-height:1.65;">One GET or POST to <code
+                style="color:var(--md-primary);">/api/generate</code> returns a PNG. Pass <code
+                style="color:var(--md-primary);">data</code>, <code style="color:var(--md-primary);">theme</code>, <code
+                style="color:var(--md-primary);">size</code> — done.</p>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="glass-card p-3 p-sm-4 p-md-5 mb-4 fade-up delay-2">
+    <section class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up delay-2">
       <div class="row align-items-center g-4">
         <div class="col-lg-6 text-center text-lg-start">
-          <div class="eyebrow">Privacy Promise</div>
-          <h2 class="h3 fw-bold text-white mb-3">We see nothing.<br>We store nothing.</h2>
-          <p style="color:rgba(226,232,240,0.65);line-height:1.7;" class="mb-3 small-text">
+          <div class="md-section-header">Privacy promise</div>
+          <h2 class="h3 md-headline text-white mb-3">We see nothing.<br>We store nothing.</h2>
+          <p style="color:var(--md-on-surface-variant);line-height:1.7;" class="mb-3">
             When you generate a QR code, your input passes directly into the rendering engine and is discarded the
             instant the image is sent back. There is no database, no analytics pipeline, no session cookie, and no user
             account.
           </p>
-          <p style="color:rgba(226,232,240,0.65);line-height:1.7;" class="mb-0 small-text">
+          <p style="color:var(--md-on-surface-variant);line-height:1.7;" class="mb-0">
             You can verify this yourself — the full source is on GitHub. Self-hosting takes a single <code
-              style="color:#67e8f9;">node .</code> command.
+              style="color:var(--md-tertiary);">node .</code> command.
           </p>
         </div>
         <div class="col-lg-6">
           <div class="row g-2 g-sm-3">
             <div class="col-6">
-              <div class="mini-card p-2.5 p-sm-3 text-center h-100">
-                <div class="privacy-icon">🚫</div>
+              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
+                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">visibility_off</div>
                 <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No tracking</div>
-                <div class="small" style="color:rgba(226,232,240,0.48); font-size:0.7rem;">No analytics or
+                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No analytics or
                   fingerprinting</div>
               </div>
             </div>
             <div class="col-6">
-              <div class="mini-card p-2.5 p-sm-3 text-center h-100">
-                <div class="privacy-icon">🗄️</div>
+              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
+                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">storage</div>
                 <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No database</div>
-                <div class="small" style="color:rgba(226,232,240,0.48); font-size:0.7rem;">Pure stateless API, zero
+                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">Pure stateless API, zero
                   persistence</div>
               </div>
             </div>
             <div class="col-6">
-              <div class="mini-card p-2.5 p-sm-3 text-center h-100">
-                <div class="privacy-icon">🍪</div>
+              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
+                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">cookie</div>
                 <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No cookies</div>
-                <div class="small" style="color:rgba(226,232,240,0.48); font-size:0.7rem;">No session, no login wall
+                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No session, no login wall
                 </div>
               </div>
             </div>
             <div class="col-6">
-              <div class="mini-card p-2.5 p-sm-3 text-center h-100">
-                <div class="privacy-icon">💸</div>
+              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
+                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">payments</div>
                 <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No upsell</div>
-                <div class="small" style="color:rgba(226,232,240,0.48); font-size:0.7rem;">No premium tier, no ads.
+                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No premium tier, no ads.
                   Ever.</div>
               </div>
             </div>
@@ -715,77 +1056,107 @@
       </div>
     </section>
 
-    <section class="glass-card p-3 p-sm-4 p-md-5 mb-4 fade-up delay-3">
+    <section id="api-section" class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up delay-3">
       <div class="row align-items-start g-4">
         <div class="col-lg-5 text-center text-lg-start">
-          <div class="eyebrow">REST API</div>
-          <h2 class="h4 fw-bold text-white mb-2">Plug in, ship fast.</h2>
-          <p class="small mb-3" style="color:rgba(226,232,240,0.58);line-height:1.72;">No SDK, no auth tokens, no setup.
+          <div class="md-section-header">REST API</div>
+          <h2 class="h4 md-headline text-white mb-2">Plug in, ship fast.</h2>
+          <p class="small mb-3" style="color:var(--md-on-surface-variant);line-height:1.72;">No SDK, no auth tokens, no setup.
             Hit the endpoint and get a PNG. Works from any language or HTTP client.</p>
           <button id="openApiExampleBtn2" type="button"
-            class="btn btn-primary-custom btn-sm px-3 py-2 fw-semibold w-100 w-lg-auto">See full example →</button>
+            class="md-btn md-btn--tonal md-btn--sm md-btn--block w-lg-auto">
+            See full example <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
         </div>
         <div class="col-lg-7 w-100">
-          <div class="mini-card p-2.5 p-sm-3 mb-2">
-            <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
-              <span class="method m-get">GET</span>
-              <code
-                style="color:#67e8f9;font-size:.72rem;word-break:break-all;">/api/generate?data=hello&theme=<%- previewTheme  %>&size=500x500</code>
-            </div>
-            <div class="small" style="color:rgba(226,232,240,0.45); font-size: 0.75rem;">Returns PNG directly — use as
-              an <code>&lt;img src&gt;</code></div>
-          </div>
-          <div class="mini-card p-2.5 p-sm-3 mb-2">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-1">
-              <div class="d-flex align-items-center">
-                <span class="method m-post">POST</span>
-                <code style="color:#a5b4fc;font-size:.75rem;">/api/generate</code>
+          <!-- GET /api/generate -->
+          <div class="api-endpoint">
+            <div class="api-endpoint__header">
+              <div class="api-endpoint__method-path">
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
+                <span class="method m-get">GET</span>
+                <code class="api-endpoint__endpoint-code">/api/generate?data=hello&theme=<%- previewTheme  %>&size=500x500&format=png</code>
               </div>
-              <span class="trust-pill tp-amber" style="font-size:.6rem;padding:2px 6px;"><%- rateLim %> req/min</span>
             </div>
-            <div class="small" style="color:rgba(226,232,240,0.45); font-size: 0.75rem;">JSON body: <code
-                style="color:#a5b4fc;">{ data, theme, size, banner? }</code> → PNG blob</div>
+            <div class="api-endpoint__description">
+              <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;">image</span>
+              Returns image directly — use as an <code>&lt;img src&gt;</code>. Formats: <code>png</code>, <code>jpg</code>, <code>svg</code>
+            </div>
+            <div class="api-endpoint__return">
+              <span class="material-symbols-outlined" style="font-size:0.8rem;">output</span>
+              <span>PNG, JPG, or SVG</span>
+            </div>
           </div>
-          <div class="mini-card p-2.5 p-sm-3">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-1">
-              <div class="d-flex align-items-center">
+
+          <!-- POST /api/generate -->
+          <div class="api-endpoint">
+            <div class="api-endpoint__header">
+              <div class="api-endpoint__method-path">
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
                 <span class="method m-post">POST</span>
-                <code style="color:#a5b4fc;font-size:.75rem;">/api/read</code>
+                <code class="api-endpoint__endpoint-code">/api/generate</code>
               </div>
-              <span class="trust-pill tp-amber" style="font-size:.6rem;padding:2px 6px;"><%- rateLim %> req/min</span>
+              <span class="md-chip chip-tone-warning" style="font-size:.62rem;padding:3px 9px 3px 7px;"><%- rateLim %> req/min</span>
             </div>
-            <div class="small" style="color:rgba(226,232,240,0.45); font-size: 0.75rem;">JSON body: <code
-                style="color:#a5b4fc;">{ image: "&lt;base64/binary/formdata&gt;" }</code> → decodes QR</div>
+            <div class="api-endpoint__description">
+              <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;">data_object</span>
+              JSON body: <code>{ data, theme, size, format?, banner? }</code>
+            </div>
+            <div class="api-endpoint__return">
+              <span class="material-symbols-outlined" style="font-size:0.8rem;">image</span>
+              <span>PNG, JPG, or SVG Blob</span>
+            </div>
+          </div>
+
+          <!-- POST /api/read -->
+          <div class="api-endpoint">
+            <div class="api-endpoint__header">
+              <div class="api-endpoint__method-path">
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
+                <span class="method m-post">POST</span>
+                <code class="api-endpoint__endpoint-code">/api/read</code>
+              </div>
+              <span class="md-chip chip-tone-warning" style="font-size:.62rem;padding:3px 9px 3px 7px;"><%- rateLim %> req/min</span>
+            </div>
+            <div class="api-endpoint__description">
+              <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;">data_object</span>
+              JSON body: <code>{ image: "&lt;base64/binary/formdata&gt;" }</code>
+            </div>
+            <div class="api-endpoint__return">
+              <span class="material-symbols-outlined" style="font-size:0.8rem;">qr_code_2</span>
+              <span>Decoded QR Text</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="glass-card p-3 p-sm-4 p-md-5 mb-4 fade-up delay-4">
+    <section class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up delay-4">
       <div class="row align-items-center g-4 text-center text-lg-start">
         <div class="col-lg-8">
-          <div class="eyebrow">Open Source</div>
-          <h2 class="h4 fw-bold text-white mb-2">Built in the open. Free forever.</h2>
-          <p style="color:rgba(226,232,240,0.65);line-height:1.7;" class="mb-3 small-text">
+          <div class="md-section-header">Open source</div>
+          <h2 class="h4 md-headline text-white mb-2">Built in the open. Free forever.</h2>
+          <p style="color:var(--md-on-surface-variant);line-height:1.7;" class="mb-3">
             QR Codify is fully open source. Read every line, report issues, suggest features, or self-host it on your
             own server in minutes. No enterprise tier. No gatekeeping.
           </p>
           <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
             <a href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer"
-              class="btn btn-outline-light btn-sm px-3 py-2 fw-semibold">
-              ⭐&nbsp; Star on GitHub
+              class="md-btn md-btn--outlined md-btn--sm">
+              <span class="material-symbols-outlined">star</span> Star on GitHub
             </a>
             <a href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer"
-              class="btn btn-sm px-3 py-2 fw-semibold"
-              style="background:rgba(139,92,246,0.13);border:1px solid rgba(139,92,246,0.3);color:#a78bfa;">
-              🍴&nbsp; Fork &amp; self-host
+              class="md-btn md-btn--tonal md-btn--sm">
+              <span class="material-symbols-outlined">fork_right</span> Fork &amp; self-host
             </a>
           </div>
         </div>
         <div class="col-lg-4 text-center">
-          <div style="font-size:3.5rem;line-height:1;margin-bottom:6px;">⚡</div>
-          <div class="fw-bold text-white mb-1">MIT Licensed</div>
-          <div class="small" style="color:rgba(226,232,240,0.4);">Use it, remix it, ship it.</div>
+          <div class="md-icon-avatar icon-avatar--warning mx-auto" style="width:64px;height:64px;">
+            <span class="material-symbols-outlined" style="font-size:2rem;">verified</span>
+          </div>
+          <div class="fw-bold text-white mb-1 mt-2">MIT Licensed</div>
+          <div class="small" style="color:var(--md-on-surface-variant);">Use it, remix it, ship it.</div>
         </div>
       </div>
     </section>
@@ -797,42 +1168,41 @@
       class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 text-center text-md-start">
       <div class="d-flex flex-column flex-sm-row align-items-center gap-2 gap-sm-3">
         <span class="fw-bold text-white" style="font-size:.9rem;">QR Codify</span>
-        <span class="small" style="color:rgba(226,232,240,0.32);">© <%- serverYear %></span>
+        <span class="small" style="color:var(--md-on-surface-variant);opacity:.6;">© <%- serverYear %></span>
         <div class="d-flex gap-2">
-          <span class="trust-pill tp-green" style="font-size:.64rem;padding:3px 10px;">🔒 No data stored</span>
-          <span class="trust-pill tp-violet" style="font-size:.64rem;padding:3px 10px;">🔓 Open source</span>
+          <span class="md-chip chip-tone-success" style="font-size:.64rem;padding:4px 10px 4px 8px;"><span class="material-symbols-outlined" style="font-size:.95rem;">lock</span>No data stored</span>
+          <span class="md-chip chip-tone-primary" style="font-size:.64rem;padding:4px 10px 4px 8px;"><span class="material-symbols-outlined" style="font-size:.95rem;">code</span>Open source</span>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-3 small" style="color:rgba(226,232,240,0.45);">
-        <a class="text-decoration-none" style="color:rgba(226,232,240,0.45);" href="https://github.com/blazeinferno64"
+      <div class="d-flex align-items-center gap-3 small">
+        <a href="https://github.com/blazeinferno64"
           target="_blank" rel="noopener noreferrer">GitHub</a>
-        <span>·</span>
-        <span>Made by BlazeInferno64</span>
+        <span style="color:var(--md-on-surface-variant);opacity:.4;">·</span>
+        <span style="color:var(--md-on-surface-variant);">Made by BlazeInferno64</span>
       </div>
     </div>
   </footer>
 
   <div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
-      <div class="modal-content border-0 shadow-lg"
-        style="background: linear-gradient(145deg, #0f172a, #111827); color: #e2e8f0; border-radius: 20px;">
-        <div class="modal-header border-secondary-subtle px-3 py-3">
+    <div class="modal-dialog modal-dialog-centered modal-md modal-fullscreen-sm-down">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header px-3 py-3">
           <div>
-            <h5 class="modal-title fw-bold text-white" id="generateModalLabel">Generate a QR Code</h5>
-            <p class="small mb-0" style="color: rgba(226,232,240,0.45);">Customize and preview in real-time.</p>
+            <h5 class="modal-title text-white" id="generateModalLabel">Generate a QR code</h5>
+            <p class="small mb-0" style="color: var(--md-on-surface-variant);">Configure text, theme, and export settings.</p>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body p-3">
           <div class="row g-3">
-            <div class="col-md-7 order-2 order-md-1">
-              <div class="mini-card p-3 mb-2.5">
-                <label for="generateText" class="form-label small text-white fw-semibold">Text / URL to encode</label>
+            <div class="col-12">
+              <div class="md-card md-card--tight p-3 mb-2.5">
+                <label for="generateText" class="form-label fw-semibold">Text / URL to encode</label>
                 <textarea id="generateText" class="form-control" rows="3" placeholder="https://example.com"></textarea>
               </div>
-              <div class="mini-card p-3 mb-2.5">
-                <label for="generateTheme" class="form-label small text-white fw-semibold">Visual Theme</label>
+              <div class="md-card md-card--tight p-3 mb-2.5">
+                <label for="generateTheme" class="form-label fw-semibold">Visual theme</label>
                 <select id="generateTheme" class="form-select">
                   <option value="">Default (Modern Mono)</option>
                   <option value="cyber">Cyber Gradient</option>
@@ -841,34 +1211,31 @@
                   <option value="glitch">Glitch Matrix</option>
                 </select>
               </div>
-              <div class="mini-card p-3">
-                <label for="generateSize" class="form-label small text-white fw-semibold">Resolution (px) (500
+              <div class="md-card md-card--tight p-3 mb-2.5">
+                <label for="generateSize" class="form-label fw-semibold">Resolution (px) (500
                   recommended)</label>
                 <input type="number" id="generateSize" class="form-control" value="500" min="100" max="1000" />
               </div>
-            </div>
-
-            <div class="col-md-5 order-1 order-md-2 d-flex flex-column align-items-center justify-content-center py-2">
-              <div class="qr-box text-center mb-2 mx-auto" style="max-width: 180px; padding: 12px;">
-                <img id="modalQrPreview" src="/api/generate?data=QR%20Codify" alt="QR Preview" class="img-fluid" />
+              <div class="md-card md-card--tight p-3">
+                <label for="generateFormat" class="form-label fw-semibold">Output format</label>
+                <select id="generateFormat" class="form-select">
+                  <option value="png">PNG (Lossless)</option>
+                  <option value="jpg">JPG (Compressed)</option>
+                  <option value="svg">SVG (Scalable)</option>
+                </select>
               </div>
-              <p class="small mb-0 text-muted" style="font-size: 0.72rem;">Live Preview</p>
             </div>
           </div>
         </div>
 
-        <div class="modal-footer border-secondary-subtle p-3">
+        <div class="modal-footer p-3">
           <div class="row w-100 g-2 m-0">
-            <div class="col-12 col-sm-4 p-0 px-1 order-3 order-sm-1">
-              <button type="button" class="btn btn-outline-light w-100" data-bs-dismiss="modal">Close</button>
+            <div class="col-12 col-sm-6 p-0 px-1 order-2 order-sm-1">
+              <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-dismiss="modal">Close</button>
             </div>
-            <div class="col-12 col-sm-4 p-0 px-1 order-1 order-sm-2">
-              <button id="updatePreviewBtn" type="button"
-                class="btn btn-primary-custom w-100 fw-semibold">Update</button>
-            </div>
-            <div class="col-12 col-sm-4 p-0 px-1 order-2 order-sm-3">
+            <div class="col-12 col-sm-6 p-0 px-1 order-1 order-sm-2">
               <a id="downloadQrBtn" href="/api/generate?data=QR%20Codify" download="qrcode.png"
-                class="btn btn-success w-100 text-white fw-semibold">Download</a>
+                class="md-btn md-btn--filled md-btn--block">Download QR</a>
             </div>
           </div>
         </div>
@@ -878,31 +1245,47 @@
 
   <div class="modal fade" id="apiExampleModal" tabindex="-1" aria-labelledby="apiExampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
-      <div class="modal-content border-0 shadow-lg"
-        style="background: linear-gradient(145deg, #0f172a, #111827); color: #e2e8f0; border-radius: 20px;">
-        <div class="modal-header border-secondary-subtle px-3 py-3">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header px-3 py-3">
           <div>
-            <h5 class="modal-title fw-bold text-white" id="apiExampleModalLabel">Developer API Usage</h5>
-            <p class="small mb-0" style="color: rgba(226,232,240,0.45);">No auth required — zero data retention setup.
+            <h5 class="modal-title text-white" id="apiExampleModalLabel">Developer API usage</h5>
+            <p class="small mb-0" style="color: var(--md-on-surface-variant);">No auth required — zero data retention setup.
             </p>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body p-3">
-          <div class="mini-card p-2 p-sm-3">
-            <h6 class="fw-semibold mb-2 small text-white" style="font-size: 0.8rem;">POST /api/generate — Returns raw
-              PNG image data</h6>
+          <!-- API Tabs -->
+          <div class="mb-3">
+            <div class="d-flex gap-2" style="border-bottom: none;">
+              <button id="generateApiTab" class="md-btn md-btn--text md-btn--sm api-tab-btn active" style="border: 2px solid var(--md-primary); border-radius: 8px;">Generate API</button>
+              <button id="readApiTab" class="md-btn md-btn--text md-btn--sm api-tab-btn">Read API</button>
+            </div>
+          </div>
+
+          <!-- Generate API Tab -->
+          <div id="generateApiContent" class="md-card md-card--tight p-2 p-sm-3">
+            <h6 class="fw-semibold mb-2 text-white" style="font-size: 0.8rem;">POST /api/generate — Returns raw image data (PNG, JPG, SVG)</h6>
             <div class="api-code-wrapper">
               <pre class="language-js"><code id="fetchExampleCode" class="language-js"></code></pre>
             </div>
           </div>
+
+          <!-- Read API Tab -->
+          <div id="readApiContent" class="md-card md-card--tight p-2 p-sm-3" style="display: none;">
+            <h6 class="fw-semibold mb-2 text-white" style="font-size: 0.8rem;">POST /api/read — Decode QR codes from images</h6>
+            <div class="api-code-wrapper">
+              <pre class="language-js"><code id="readExampleCode" class="language-js"></code></pre>
+            </div>
+          </div>
         </div>
 
-        <div class="modal-footer border-secondary-subtle p-3 d-flex flex-row gap-2">
-          <button type="button" class="btn btn-outline-light flex-fill" data-bs-dismiss="modal">Close</button>
-          <button id="openJoltBtn" type="button" class="btn btn-primary-custom text-white fw-semibold flex-fill">Try in
-            Jolt →</button>
+        <div class="modal-footer p-3 d-flex flex-row gap-2">
+          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close</button>
+          <button id="openJoltBtn" type="button" class="md-btn md-btn--filled flex-fill">
+            Try in Jolt <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
         </div>
       </div>
     </div>
@@ -910,64 +1293,114 @@
 
   <div class="modal fade" id="scanModal" tabindex="-1" aria-labelledby="scanModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-      <div class="modal-content border-0 shadow-lg"
-        style="background: linear-gradient(145deg, #0f172a, #111827); color: #e2e8f0; border-radius: 20px;">
-        <div class="modal-header border-secondary-subtle px-3 py-3">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header px-3 py-3">
           <div>
-            <h5 class="modal-title fw-bold text-white" id="scanModalLabel">Scan / Decode QR Code</h5>
-            <p class="small mb-0" style="color: rgba(226,232,240,0.45);">Upload local images to decrypt content
+            <h5 class="modal-title text-white" id="scanModalLabel">Scan / decode QR code</h5>
+            <p class="small mb-0" style="color: var(--md-on-surface-variant);">Upload local images to decrypt content
               instantly.</p>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body p-3">
-          <div class="mini-card p-3 mb-3">
-            <label class="fw-semibold mb-2 small text-white">Upload Image File</label>
+          <div class="md-card md-card--tight p-3 mb-3">
+            <label class="fw-semibold mb-2 text-white small">Upload image file</label>
             <input id="scanFileInput" type="file" accept="image/*" class="form-control" />
           </div>
-          <div class="mini-card p-3">
-            <h6 class="fw-semibold mb-2 small text-white">Decoded Contents</h6>
+          <div class="md-card md-card--tight p-3">
+            <h6 class="fw-semibold mb-2 text-white small">Decoded contents</h6>
             <pre id="scanResult">Waiting for target selection...</pre>
             <a id="scanOpenLink" href="#" target="_blank" rel="noopener noreferrer"
-              class="btn btn-primary-custom btn-sm w-100 fw-semibold mt-2"
+              class="md-btn md-btn--tonal md-btn--sm md-btn--block mt-2"
               style="display:none;">
-              <i class="material-symbols-outlined" style="font-size:1rem;">open_in_new</i>&nbsp;Open Link
+              <span class="material-symbols-outlined" style="font-size:1rem;">open_in_new</span>Open link
             </a>
           </div>
         </div>
 
-        <div class="modal-footer border-secondary-subtle p-3 d-flex flex-row gap-2">
-          <button type="button" class="btn btn-outline-light flex-fill" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer p-3 d-flex flex-row gap-2">
+          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close</button>
           <button id="decodeUploadBtn" type="button"
-            class="btn btn-primary-custom text-white fw-semibold flex-fill">Decode Image</button>
+            class="md-btn md-btn--filled flex-fill">Decode image</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    // Material Design Ripple Effect
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement('div');
+      const rect = button.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      
+      // Handle both mouse and touch events
+      const x = (event.clientX || event.touches?.[0]?.clientX || 0) - rect.left - size / 2;
+      const y = (event.clientY || event.touches?.[0]?.clientY || 0) - rect.top - size / 2;
+
+      ripple.classList.add('md-ripple');
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+
+      button.appendChild(ripple);
+      ripple.classList.add('active');
+
+      setTimeout(() => ripple.remove(), 900);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('updatePreviewBtn')?.addEventListener('click', updateModalPreview);
+      // Attach ripple effect to all md-btn and md-icon-btn buttons on pointerdown (mouse + touch)
+      document.querySelectorAll('.md-btn, .md-icon-btn').forEach(btn => {
+        btn.addEventListener('pointerdown', createRipple);
+      });
+
+      // Event listeners for inputs to update download link dynamically in modal
+      ['generateText', 'generateTheme', 'generateSize', 'generateFormat'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', updateModalDownloadLink);
+        document.getElementById(id)?.addEventListener('change', updateModalDownloadLink);
+      });
+
       document.getElementById('decodeUploadBtn')?.addEventListener('click', scanUploadedFile);
 
       function openApiModal() {
         renderFetchExample();
+        renderReadExample();
+        switchApiTab('generate');
         new bootstrap.Modal(document.getElementById('apiExampleModal')).show();
       }
       document.getElementById('openApiExampleBtn')?.addEventListener('click', openApiModal);
       document.getElementById('openApiExampleBtn2')?.addEventListener('click', openApiModal);
+      document.getElementById('openApiExampleBtnTop')?.addEventListener('click', openApiModal);
       document.getElementById('openJoltBtn')?.addEventListener('click', openExampleInJolt);
+      
+      // Tab switching
+      document.getElementById('generateApiTab')?.addEventListener('click', () => switchApiTab('generate'));
+      document.getElementById('readApiTab')?.addEventListener('click', () => switchApiTab('read'));
     });
 
-    function updateModalPreview() {
-      const text = document.getElementById('generateText').value.trim() || 'QR Codify';
-      const theme = document.getElementById('generateTheme').value;
-      const size = document.getElementById('generateSize').value || 500;
-      let url = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}`;
-      if (theme) url += `&theme=${theme}`;
-      document.getElementById('modalQrPreview').src = url;
-      document.getElementById('downloadQrBtn').href = url;
+    function updateModalDownloadLink() {
+      const textInput = document.getElementById('generateText');
+      const text = textInput.value.trim() || 'QR Codify';
+      const theme = document.getElementById('generateTheme')?.value || '';
+      const size = document.getElementById('generateSize')?.value || '500';
+      const formatElement = document.getElementById('generateFormat');
+      const format = formatElement?.value || 'png';
+      
+      if (theme !== '' && format === 'svg') {
+        // Optional notice or handling if needed
+      }
+
+      let downloadUrl = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}&format=${format}`;
+      if (theme) downloadUrl += `&theme=${theme}`;
+      
+      const downloadBtn = document.getElementById('downloadQrBtn');
+      if (downloadBtn) {
+        downloadBtn.href = downloadUrl;
+        downloadBtn.download = `qrcode.${format}`;
+      }
     }
 
     function renderFetchExample() {
@@ -981,6 +1414,7 @@ const response = await fetch('${window.location.origin}/api/generate', {
     data: 'Powered by QR Codify. Visit - ${window.location.origin} for more info!', // Replace with your desired data
     theme: 'cyber',  // 'cyber' | 'tokyonight' | 'neon'
     size: 600,       // pixels, 100–1000
+    format: 'png',   // 'png' | 'jpg' | 'svg' (optional, defaults to png)
     // banner: 'data:image/png;base64,<your_base64_here>'
   })
 });
@@ -996,8 +1430,85 @@ window.open(imageUrl);`;
       }
     }
 
+    function renderReadExample() {
+      const code = `// REST API — Decode QR codes from images (PNG, JPG, etc.)
+// Supports: File uploads, Base64 strings, or data URIs
+// Rate limit: 45 requests/min per IP
+
+// Decode from Base64 / Data URI
+const dataURi = "data:image/png;base64,<your_base64_here>";
+
+const response = await fetch('${window.location.origin}/api/read', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ image: dataUri })
+});
+
+// Decode from File Upload
+/*
+const formData = new FormData();
+const fileInput = document.querySelector('input[type="file"]');
+if (!fileInput.files[0]) return alert('Please select an image');
+formData.append('image', fileInput.files[0]);
+
+const response = await fetch('${window.location.origin}/api/read', {
+  method: 'POST',
+  body: formData
+});
+*/
+
+const data = await response.json();
+
+if (data.success) {
+  console.log('Decoded QR:', data.response);
+  alert('QR Code contains: ' + data.response);
+} else {
+  console.error('Error:', data.error);
+  alert('Failed to decode: ' + data.error);
+}`;
+
+      const target = document.getElementById('readExampleCode');
+      if (target) {
+        target.textContent = code;
+        if (window.Prism) Prism.highlightElement(target);
+      }
+    }
+
+    function switchApiTab(tabName) {
+      const generateContent = document.getElementById('generateApiContent');
+      const readContent = document.getElementById('readApiContent');
+      const generateTab = document.getElementById('generateApiTab');
+      const readTab = document.getElementById('readApiTab');
+
+      if (tabName === 'generate') {
+        generateContent.style.display = 'block';
+        readContent.style.display = 'none';
+        generateTab.classList.add('active');
+        generateTab.style.border = '2px solid var(--md-primary)';
+        generateTab.style.borderRadius = '8px';
+        readTab.classList.remove('active');
+        readTab.style.border = 'none';
+      } else {
+        generateContent.style.display = 'none';
+        readContent.style.display = 'block';
+        generateTab.classList.remove('active');
+        generateTab.style.border = 'none';
+        readTab.classList.add('active');
+        readTab.style.border = '2px solid var(--md-primary)';
+        readTab.style.borderRadius = '8px';
+      }
+    }
+
     function openExampleInJolt() {
-      const code = document.getElementById('fetchExampleCode')?.textContent || '';
+      const generateContent = document.getElementById('generateApiContent');
+      let code = '';
+
+      if (generateContent.style.display !== 'none') {
+        code = document.getElementById('fetchExampleCode')?.textContent || '';
+      } else {
+        code = document.getElementById('readExampleCode')?.textContent || '';
+      }
+
       const joltUrl = `http://blazeinferno64.github.io/jolt.html?code=${encodeURIComponent(code)}&run=true`;
       window.open(joltUrl, '_blank', 'noopener,noreferrer');
     }
@@ -1038,6 +1549,7 @@ window.open(imageUrl);`;
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/BlazeInferno64/platformify.js@main/platformify.js"></script>
 </body>
 
 </html>

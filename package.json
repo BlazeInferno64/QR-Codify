@@ -1,6 +1,6 @@
 {
   "name": "qr-codify",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "All in one QR Codes solution by QR Codify",
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.0",
-    "@vercel/node": "^5.8.17",
+    "@napi-rs/canvas": "^1.0.8",
+    "@vercel/node": "^5.10.2",
     "@zxing/library": "^0.23.0",
     "busboy": "^1.6.0",
     "canvas": "^3.2.3",
@@ -23,9 +23,9 @@
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.5.2",
-    "helmet": "^8.2.0",
-    "morgan": "^1.11.0",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "morgan": "^1.12.0",
     "nodemon": "^3.1.14",
     "qrcode": "^1.5.4"
   }
