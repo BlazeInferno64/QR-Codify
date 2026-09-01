@@ -1571,7 +1571,7 @@ window.open(imageUrl);`;
 // Rate limit: 45 requests/min per IP
 
 // Decode from Base64 / Data URI
-const dataURi = "data:image/png;base64,<your_base64_here>";
+const dataUri = "data:image/png;base64,<your_base64_here>";
 
 const response = await fetch('${window.location.origin}/api/read', {
   method: 'POST',
