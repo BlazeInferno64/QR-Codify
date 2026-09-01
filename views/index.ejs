@@ -76,6 +76,11 @@
       padding-top: 64px;
     }
 
+    button {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     code,
     .font-mono {
       font-family: "Geist Mono", monospace;
@@ -458,6 +463,109 @@
     .icon-avatar--tertiary { background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
     .icon-avatar--success { background: var(--md-success-container); color: var(--md-success); }
     .icon-avatar--warning { background: var(--md-warning-container); color: var(--md-warning); }
+
+    /* ============ Privacy mini cards ============ */
+    .privacy-mini {
+      background: linear-gradient(160deg, var(--md-surface-container) 0%, var(--md-surface-container-low) 100%);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-md);
+      padding: 18px 12px;
+      text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      transition: border-color 200ms ease, background 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .privacy-mini::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--privacy-accent, var(--md-primary)), transparent);
+      opacity: 0.7;
+    }
+
+    .privacy-mini:hover {
+      border-color: var(--md-outline);
+      background: linear-gradient(160deg, var(--md-surface-container-high) 0%, var(--md-surface-container) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    .privacy-mini__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .privacy-mini__icon .material-symbols-outlined {
+      font-size: 1.35rem;
+    }
+
+    .privacy-mini__icon--primary {
+      background: rgba(183, 195, 255, 0.12);
+      color: var(--md-primary);
+    }
+    .privacy-mini__icon--tertiary {
+      background: rgba(125, 219, 236, 0.12);
+      color: var(--md-tertiary);
+    }
+    .privacy-mini__icon--success {
+      background: rgba(148, 217, 164, 0.12);
+      color: var(--md-success);
+    }
+    .privacy-mini__icon--warning {
+      background: rgba(246, 207, 122, 0.12);
+      color: var(--md-warning);
+    }
+
+    .privacy-mini__title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .privacy-mini__desc {
+      font-size: 0.72rem;
+      color: var(--md-on-surface-variant);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    @media (max-width: 576px) {
+      .privacy-mini {
+        padding: 14px 10px;
+      }
+      .privacy-mini__icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+      .privacy-mini__icon .material-symbols-outlined {
+        font-size: 1.15rem;
+      }
+      .privacy-mini__title {
+        font-size: 0.8rem;
+      }
+      .privacy-mini__desc {
+        font-size: 0.66rem;
+      }
+    }
 
     /* ============ QR preview box ============ */
     .qr-box {
@@ -1020,35 +1128,39 @@
         <div class="col-lg-6">
           <div class="row g-2 g-sm-3">
             <div class="col-6">
-              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
-                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">visibility_off</div>
-                <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No tracking</div>
-                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No analytics or
-                  fingerprinting</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
-                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">storage</div>
-                <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No database</div>
-                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">Pure stateless API, zero
-                  persistence</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
-                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">cookie</div>
-                <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No cookies</div>
-                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No session, no login wall
+              <div class="privacy-mini" style="--privacy-accent: var(--md-primary);">
+                <div class="privacy-mini__icon privacy-mini__icon--primary">
+                  <span class="material-symbols-outlined">visibility_off</span>
                 </div>
+                <div class="privacy-mini__title">No tracking</div>
+                <p class="privacy-mini__desc">No analytics or fingerprinting</p>
               </div>
             </div>
             <div class="col-6">
-              <div class="md-card md-card--tight p-2.5 p-sm-3 text-center h-100">
-                <div class="material-symbols-outlined" style="font-size:1.7rem;color:var(--md-on-surface-variant);margin-bottom:6px;">payments</div>
-                <div class="small fw-bold text-white mb-1" style="font-size:0.8rem;">No upsell</div>
-                <div class="small" style="color:var(--md-on-surface-variant); font-size:0.7rem;">No premium tier, no ads.
-                  Ever.</div>
+              <div class="privacy-mini" style="--privacy-accent: var(--md-tertiary);">
+                <div class="privacy-mini__icon privacy-mini__icon--tertiary">
+                  <span class="material-symbols-outlined">storage</span>
+                </div>
+                <div class="privacy-mini__title">No database</div>
+                <p class="privacy-mini__desc">Pure stateless API, zero persistence</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="privacy-mini" style="--privacy-accent: var(--md-success);">
+                <div class="privacy-mini__icon privacy-mini__icon--success">
+                  <span class="material-symbols-outlined">cookie</span>
+                </div>
+                <div class="privacy-mini__title">No cookies</div>
+                <p class="privacy-mini__desc">No session, no login wall</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="privacy-mini" style="--privacy-accent: var(--md-warning);">
+                <div class="privacy-mini__icon privacy-mini__icon--warning">
+                  <span class="material-symbols-outlined">payments</span>
+                </div>
+                <div class="privacy-mini__title">No upsell</div>
+                <p class="privacy-mini__desc">No premium tier, no ads. Ever.</p>
               </div>
             </div>
           </div>
@@ -1061,7 +1173,7 @@
         <div class="col-lg-5 text-center text-lg-start">
           <div class="md-section-header">REST API</div>
           <h2 class="h4 md-headline text-white mb-2">Plug in, ship fast.</h2>
-          <p class="small mb-3" style="color:var(--md-on-surface-variant);line-height:1.72;">No SDK, no auth tokens, no setup.
+          <p class="small mb-3" style="color:var(--md-on-surface-variant);line-height:1.72;">No auth tokens, no setup.
             Hit the endpoint and get a PNG. Works from any language or HTTP client.</p>
           <button id="openApiExampleBtn2" type="button"
             class="md-btn md-btn--tonal md-btn--sm md-btn--block w-lg-auto">
@@ -1184,19 +1296,37 @@
   </footer>
 
   <div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md modal-fullscreen-sm-down">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header px-3 py-3">
           <div>
             <h5 class="modal-title text-white" id="generateModalLabel">Generate a QR code</h5>
-            <p class="small mb-0" style="color: var(--md-on-surface-variant);">Configure text, theme, and export settings.</p>
+            <p class="small mb-0" style="color: var(--md-on-surface-variant);">Generate a QR code from text or a URL easily!</p>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body p-3">
           <div class="row g-3">
-            <div class="col-12">
+            <!-- Live Preview: top on mobile, right on desktop -->
+            <div class="col-lg-6 order-1 order-lg-2 d-flex flex-column">
+              <div class="md-card md-card--tight p-3 text-center h-100 d-flex flex-column justify-content-center">
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                  <span class="material-symbols-outlined" style="font-size: 1.15rem; color: var(--md-primary);">visibility</span>
+                  <div class="md-label mb-0" style="font-weight: 700; letter-spacing: 0.02em;">Live Preview</div>
+                </div>
+                <div class="qr-box mb-3 mx-auto" style="max-width: 260px;">
+                  <img id="modalQrPreview"
+                    src="/api/generate?data=QR%20Codify&size=500x500"
+                    alt="QR code live preview" class="img-fluid" />
+                </div>
+                <div class="small" style="color: var(--md-on-surface-variant); font-size: 0.78rem;">
+                  Click Update QR to refresh the preview.
+                </div>
+              </div>
+            </div>
+            <!-- Form fields: below on mobile, left on desktop -->
+            <div class="col-lg-6 order-2 order-lg-1">
               <div class="md-card md-card--tight p-3 mb-2.5">
                 <label for="generateText" class="form-label fw-semibold">Text / URL to encode</label>
                 <textarea id="generateText" class="form-control" rows="3" placeholder="https://example.com"></textarea>
@@ -1230,10 +1360,13 @@
 
         <div class="modal-footer p-3">
           <div class="row w-100 g-2 m-0">
-            <div class="col-12 col-sm-6 p-0 px-1 order-2 order-sm-1">
+            <div class="col-12 col-sm-4 p-0 px-1 order-3 order-sm-1">
               <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-dismiss="modal">Close</button>
             </div>
-            <div class="col-12 col-sm-6 p-0 px-1 order-1 order-sm-2">
+            <div class="col-12 col-sm-4 p-0 px-1 order-2 order-sm-2">
+              <button type="button" id="updatePreviewBtn" class="md-btn md-btn--tonal md-btn--block">Update QR</button>
+            </div>
+            <div class="col-12 col-sm-4 p-0 px-1 order-1 order-sm-3">
               <a id="downloadQrBtn" href="/api/generate?data=QR%20Codify" download="qrcode.png"
                 class="md-btn md-btn--filled md-btn--block">Download QR</a>
             </div>
@@ -1258,7 +1391,7 @@
         <div class="modal-body p-3">
           <!-- API Tabs -->
           <div class="mb-3">
-            <div class="d-flex gap-2" style="border-bottom: none;">
+            <div class="d-flex gap-2 border-bottom" style="border-bottom: 1px solid var(--md-outline-variant);">
               <button id="generateApiTab" class="md-btn md-btn--text md-btn--sm api-tab-btn active" style="border: 2px solid var(--md-primary); border-radius: 8px;">Generate API</button>
               <button id="readApiTab" class="md-btn md-btn--text md-btn--sm api-tab-btn">Read API</button>
             </div>
@@ -1357,12 +1490,7 @@
         btn.addEventListener('pointerdown', createRipple);
       });
 
-      // Event listeners for inputs to update download link dynamically in modal
-      ['generateText', 'generateTheme', 'generateSize', 'generateFormat'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', updateModalDownloadLink);
-        document.getElementById(id)?.addEventListener('change', updateModalDownloadLink);
-      });
-
+      // QR preview & download link update only when the Update button is clicked
       document.getElementById('decodeUploadBtn')?.addEventListener('click', scanUploadedFile);
 
       function openApiModal() {
@@ -1380,6 +1508,8 @@
       document.getElementById('generateApiTab')?.addEventListener('click', () => switchApiTab('generate'));
       document.getElementById('readApiTab')?.addEventListener('click', () => switchApiTab('read'));
     });
+    
+    document.getElementById("updatePreviewBtn").addEventListener("click", updateModalDownloadLink);
 
     function updateModalDownloadLink() {
       const textInput = document.getElementById('generateText');
@@ -1388,14 +1518,19 @@
       const size = document.getElementById('generateSize')?.value || '500';
       const formatElement = document.getElementById('generateFormat');
       const format = formatElement?.value || 'png';
+
+      let previewUrl = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}&format=${format}`;
+      let downloadUrl = previewUrl;
+      if (theme) {
+        previewUrl += `&theme=${theme}`;
+        downloadUrl += `&theme=${theme}`;
+      }
       
-      if (theme !== '' && format === 'svg') {
-        // Optional notice or handling if needed
+      const previewImg = document.getElementById('modalQrPreview');
+      if (previewImg) {
+        previewImg.src = previewUrl;
       }
 
-      let downloadUrl = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}&format=${format}`;
-      if (theme) downloadUrl += `&theme=${theme}`;
-      
       const downloadBtn = document.getElementById('downloadQrBtn');
       if (downloadBtn) {
         downloadBtn.href = downloadUrl;
