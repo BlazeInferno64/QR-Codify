@@ -146,10 +146,10 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://*.fontawesome.com", "https://fontawesome.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
-            connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://api.qrserver.com", "https://fonts.gstatic.com"],
-            fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "https://fonts.googleapis.com", "data:"],
+            connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://api.qrserver.com", "https://fonts.gstatic.com", "https://*.fontawesome.com"],
+            fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "https://fonts.googleapis.com", "https://*.fontawesome.com", "data:"],
             imgSrc: ["'self'", "data:", "blob:", "https:"],
         },
     },

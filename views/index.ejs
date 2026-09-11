@@ -16,6 +16,7 @@
   <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script defer src="https://kit.fontawesome.com/f3220d5256.js" crossorigin="anonymous"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -463,6 +464,54 @@
     .icon-avatar--tertiary { background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
     .icon-avatar--success { background: var(--md-success-container); color: var(--md-success); }
     .icon-avatar--warning { background: var(--md-warning-container); color: var(--md-warning); }
+
+    /* ============ FAQ accordion ============ */
+    .faq-item__trigger {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--shape-sm);
+    }
+
+    .faq-item__trigger:focus-visible {
+      outline: 2px solid var(--md-primary);
+      outline-offset: -2px;
+      border-radius: var(--shape-sm);
+    }
+
+    .faq-item__chevron {
+      color: var(--md-on-surface-variant);
+      transition: transform 200ms ease;
+      flex-shrink: 0;
+      font-size: 1.3rem;
+    }
+
+    .faq-item__trigger[aria-expanded="true"] .faq-item__chevron {
+      transform: rotate(180deg);
+      color: var(--md-primary);
+    }
+
+    .faq-item__body {
+      padding: 0 16px 16px 68px;
+      color: var(--md-on-surface-variant);
+      font-size: .88rem;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 575.98px) {
+      .faq-item__body {
+        padding-left: 16px;
+      }
+    }
 
     /* ============ Privacy mini cards ============ */
     .privacy-mini {
@@ -960,16 +1009,16 @@
   <header class="md-app-bar">
     <a href="/" class="md-app-bar__brand">
       <span class="md-app-bar__mark">
-        <span class="material-symbols-outlined" style="font-size:1.15rem;">qr_code_2</span>
+        <span class="material-symbols-outlined" style="font-size:1.15rem;">qr_code</span>
       </span>
       QR Codify
     </a>
     <div class="md-app-bar__actions">
       <button id="openApiExampleBtnTop" type="button" class="md-icon-btn" title="API example">
-        <span class="material-symbols-outlined">api</span>
+        <span class="material-symbols-outlined">code</span>
       </button>
       <a class="md-icon-btn" href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer" title="View on GitHub">
-        <span class="material-symbols-outlined">code</span>
+        <i class="fa fa-github"></i>
       </a>
     </div>
   </header>
@@ -996,14 +1045,14 @@
           <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-2 mb-4">
             <button type="button" class="md-btn md-btn--filled md-btn--block w-sm-auto"
               data-bs-toggle="modal" data-bs-target="#generateModal">
-              <span class="material-symbols-outlined">qr_code_2</span> Generate QR
+              <span class="material-symbols-outlined">qr_code</span> Generate QR
             </button>
             <button type="button" class="md-btn md-btn--outlined md-btn--block w-sm-auto"
               data-bs-toggle="modal" data-bs-target="#scanModal">
               <span class="material-symbols-outlined">qr_code_scanner</span> Scan QR
             </button>
             <button id="openApiExampleBtn" type="button" class="md-btn md-btn--tonal md-btn--block w-sm-auto">
-              <span class="material-symbols-outlined">api</span> API example
+              <span class="material-symbols-outlined">code</span> API example
             </button>
           </div>
 
@@ -1177,7 +1226,7 @@
             Hit the endpoint and get a PNG. Works from any language or HTTP client.</p>
           <button id="openApiExampleBtn2" type="button"
             class="md-btn md-btn--tonal md-btn--sm md-btn--block w-lg-auto">
-            See full example <span class="material-symbols-outlined">arrow_forward</span>
+            See full example <span class="material-symbols-outlined">open_in_new</span>
           </button>
         </div>
         <div class="col-lg-7 w-100">
@@ -1185,7 +1234,7 @@
           <div class="api-endpoint">
             <div class="api-endpoint__header">
               <div class="api-endpoint__method-path">
-                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">code</span></div>
                 <span class="method m-get">GET</span>
                 <code class="api-endpoint__endpoint-code">/api/generate?data=hello&theme=<%- previewTheme  %>&size=500x500&format=png</code>
               </div>
@@ -1204,7 +1253,7 @@
           <div class="api-endpoint">
             <div class="api-endpoint__header">
               <div class="api-endpoint__method-path">
-                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">code</span></div>
                 <span class="method m-post">POST</span>
                 <code class="api-endpoint__endpoint-code">/api/generate</code>
               </div>
@@ -1224,7 +1273,7 @@
           <div class="api-endpoint">
             <div class="api-endpoint__header">
               <div class="api-endpoint__method-path">
-                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">api</span></div>
+                <div class="api-endpoint__icon"><span class="material-symbols-outlined" style="font-size:0.9rem;">code</span></div>
                 <span class="method m-post">POST</span>
                 <code class="api-endpoint__endpoint-code">/api/read</code>
               </div>
@@ -1270,6 +1319,100 @@
           <div class="fw-bold text-white mb-1 mt-2">MIT Licensed</div>
           <div class="small" style="color:var(--md-on-surface-variant);">Use it, remix it, ship it.</div>
         </div>
+      </div>
+    </section>
+
+    <section class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up delay-4">
+      <div class="mb-4 text-center text-lg-start">
+        <div class="md-section-header">FAQ</div>
+        <h2 class="h4 md-headline text-white mb-2">Frequently asked questions</h2>
+        <p class="mb-0" style="color:var(--md-on-surface-variant);line-height:1.7;">
+          Straight answers about data, pricing, and hosting — no fine print.
+        </p>
+      </div>
+
+      <div class="faq-list">
+
+          <div class="md-card md-card--tight mb-2.5">
+            <button class="faq-item__trigger" type="button" data-bs-toggle="collapse" data-bs-target="#faqAnswer1"
+              aria-expanded="false" aria-controls="faqAnswer1">
+              <span class="d-flex align-items-center gap-3">
+                <span class="md-icon-avatar icon-avatar--warning mb-0" style="width:40px;height:40px;">
+                  <span class="material-symbols-outlined" style="font-size:1.15rem;">sell</span>
+                </span>
+                <span class="fw-semibold text-white" style="font-size:.95rem;">Do you sell QR code data?</span>
+              </span>
+              <span class="material-symbols-outlined faq-item__chevron">expand_more</span>
+            </button>
+            <div class="collapse" id="faqAnswer1">
+              <div class="faq-item__body">
+                No — never. QR Codify doesn't sell, trade, or share QR code data with anyone, for any reason. There's
+                no analytics pipeline profiling what you generate or scan, no data broker relationships, and no
+                hidden monetization of your content. That's not part of the business, and it never will be.
+              </div>
+            </div>
+          </div>
+
+          <div class="md-card md-card--tight mb-2.5">
+            <button class="faq-item__trigger" type="button" data-bs-toggle="collapse" data-bs-target="#faqAnswer2"
+              aria-expanded="false" aria-controls="faqAnswer2">
+              <span class="d-flex align-items-center gap-3">
+                <span class="md-icon-avatar icon-avatar--success mb-0" style="width:40px;height:40px;">
+                  <span class="material-symbols-outlined" style="font-size:1.15rem;">payments</span>
+                </span>
+                <span class="fw-semibold text-white" style="font-size:.95rem;">How much does the QR code API cost?</span>
+              </span>
+              <span class="material-symbols-outlined faq-item__chevron">expand_more</span>
+            </button>
+            <div class="collapse" id="faqAnswer2">
+              <div class="faq-item__body">
+                Nothing. It's free forever — no paid tiers, no usage-based billing, no credit card required. Use
+                <code style="color:var(--md-primary);">/api/generate</code> and <code style="color:var(--md-primary);">/api/read</code>
+                anywhere, anytime, for personal or commercial projects alike, within the published rate limit.
+              </div>
+            </div>
+          </div>
+
+          <div class="md-card md-card--tight mb-2.5">
+            <button class="faq-item__trigger" type="button" data-bs-toggle="collapse" data-bs-target="#faqAnswer3"
+              aria-expanded="false" aria-controls="faqAnswer3">
+              <span class="d-flex align-items-center gap-3">
+                <span class="md-icon-avatar icon-avatar--tertiary mb-0" style="width:40px;height:40px;">
+                  <span class="material-symbols-outlined" style="font-size:1.15rem;">dns</span>
+                </span>
+                <span class="fw-semibold text-white" style="font-size:.95rem;">Can I host your project myself?</span>
+              </span>
+              <span class="material-symbols-outlined faq-item__chevron">expand_more</span>
+            </button>
+            <div class="collapse" id="faqAnswer3">
+              <div class="faq-item__body">
+                Yes. QR Codify is free and fully open source — anyone can read every line of source code, audit how
+                it works, and self-host it on their own server in minutes. No enterprise tier, no locked-away
+                internals, no gatekeeping.
+              </div>
+            </div>
+          </div>
+
+          <div class="md-card md-card--tight">
+            <button class="faq-item__trigger" type="button" data-bs-toggle="collapse" data-bs-target="#faqAnswer4"
+              aria-expanded="false" aria-controls="faqAnswer4">
+              <span class="d-flex align-items-center gap-3">
+                <span class="md-icon-avatar mb-0" style="width:40px;height:40px;">
+                  <span class="material-symbols-outlined" style="font-size:1.15rem;">visibility_off</span>
+                </span>
+                <span class="fw-semibold text-white" style="font-size:.95rem;">Do you keep logs of QR codes generated?</span>
+              </span>
+              <span class="material-symbols-outlined faq-item__chevron">expand_more</span>
+            </button>
+            <div class="collapse" id="faqAnswer4">
+              <div class="faq-item__body">
+                No. QR Codify doesn't keep logs of anything at all. That's the privacy policy in one sentence: we see
+                nothing, we store nothing. Every image is generated or decoded in memory and discarded the instant
+                the response is sent back to you.
+              </div>
+            </div>
+          </div>
+
       </div>
     </section>
 
@@ -1361,14 +1504,14 @@
         <div class="modal-footer p-3">
           <div class="row w-100 g-2 m-0">
             <div class="col-12 col-sm-4 p-0 px-1 order-3 order-sm-1">
-              <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-dismiss="modal">Close <span class="material-symbols-outlined">block</span></button>
             </div>
             <div class="col-12 col-sm-4 p-0 px-1 order-2 order-sm-2">
-              <button type="button" id="updatePreviewBtn" class="md-btn md-btn--tonal md-btn--block">Update QR</button>
+              <button type="button" id="updatePreviewBtn" class="md-btn md-btn--tonal md-btn--block">Update QR <span class="material-symbols-outlined">update</span></button>
             </div>
             <div class="col-12 col-sm-4 p-0 px-1 order-1 order-sm-3">
               <a id="downloadQrBtn" href="/api/generate?data=QR%20Codify" download="qrcode.png"
-                class="md-btn md-btn--filled md-btn--block">Download QR</a>
+                class="md-btn md-btn--filled md-btn--block">Download QR <span class="material-symbols-outlined">cloud_download</span></a>
             </div>
           </div>
         </div>
@@ -1415,9 +1558,9 @@
         </div>
 
         <div class="modal-footer p-3 d-flex flex-row gap-2">
-          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close <span class="material-symbols-outlined">block</span></button>
           <button id="openJoltBtn" type="button" class="md-btn md-btn--filled flex-fill">
-            Try in Jolt <span class="material-symbols-outlined">arrow_forward</span>
+            Try in Jolt <span class="material-symbols-outlined">open_in_new</span>
           </button>
         </div>
       </div>
@@ -1453,9 +1596,9 @@
         </div>
 
         <div class="modal-footer p-3 d-flex flex-row gap-2">
-          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="md-btn md-btn--outlined flex-fill" data-bs-dismiss="modal">Close <span class="material-symbols-outlined">block</span></button>
           <button id="decodeUploadBtn" type="button"
-            class="md-btn md-btn--filled flex-fill">Decode image</button>
+            class="md-btn md-btn--filled flex-fill">Decode image <span class="material-symbols-outlined">qr_code_scanner</span></button>
         </div>
       </div>
     </div>
@@ -1485,8 +1628,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      // Attach ripple effect to all md-btn and md-icon-btn buttons on pointerdown (mouse + touch)
-      document.querySelectorAll('.md-btn, .md-icon-btn').forEach(btn => {
+      // Attach ripple effect to all md-btn, md-icon-btn, and FAQ accordion triggers on pointerdown (mouse + touch)
+      document.querySelectorAll('.md-btn, .md-icon-btn, .faq-item__trigger').forEach(btn => {
         btn.addEventListener('pointerdown', createRipple);
       });
 
@@ -1571,7 +1714,7 @@ window.open(imageUrl);`;
 // Rate limit: 45 requests/min per IP
 
 // Decode from Base64 / Data URI
-const dataUri = "data:image/png;base64,<your_base64_here>";
+const dataURi = "data:image/png;base64,<your_base64_here>";
 
 const response = await fetch('${window.location.origin}/api/read', {
   method: 'POST',
@@ -1648,37 +1791,65 @@ if (data.success) {
       window.open(joltUrl, '_blank', 'noopener,noreferrer');
     }
 
+    // Downscales an image file to a max dimension via an off-screen canvas and
+    // resolves with a JPEG data URL. Large phone-camera photos can confuse the
+    // server's QR binarizer, so we shrink client-side before sending.
+    function downscaleImageFile(file, maxDimension = 1000) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          // Always resample to maxDimension, even when upscaling. Small
+          // native-resolution renders (e.g. themed/dotted QR codes) can fail
+          // the server's binarizer at their original size; the resampling
+          // introduces just enough smoothing for detection to succeed.
+          const scale = maxDimension / Math.max(img.width, img.height);
+          const targetW = Math.round(img.width * scale);
+          const targetH = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+          resolve(canvas.toDataURL('image/jpeg', 0.92));
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('Could not load the selected file as an image.'));
+        };
+        img.src = objectUrl;
+      });
+    }
+
     async function scanUploadedFile() {
       const input = document.getElementById('scanFileInput');
       const resultBox = document.getElementById('scanResult');
       const openLinkBtn = document.getElementById('scanOpenLink');
       if (!input?.files[0]) return alert('Select an image first.');
       openLinkBtn.style.display = 'none';
-      const reader = new FileReader();
-      reader.onload = async () => {
-        resultBox.textContent = 'Analyzing...';
+      resultBox.textContent = 'Analyzing...';
+      try {
+        const dataUrl = await downscaleImageFile(input.files[0]);
+        const response = await fetch('/api/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        const data = await response.json();
+        const decoded = data.response ? data.response : data.error;
+        resultBox.textContent = decoded;
         try {
-          const response = await fetch('/api/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: reader.result })
-          });
-          const data = await response.json();
-          const decoded = data.response ? data.response : data.error;
-          resultBox.textContent = decoded;
-          try {
-            const url = new URL(decoded.trim());
-            if (url.protocol === 'https:' || url.protocol === 'http:') {
-              openLinkBtn.href = url.href;
-              openLinkBtn.style.display = 'flex';
-            }
-          } catch (_) {}
-        } catch (e) {
-          resultBox.textContent = 'Error decoding image.';
-          openLinkBtn.style.display = 'none';
-        }
-      };
-      reader.readAsDataURL(input.files[0]);
+          const url = new URL(decoded.trim());
+          if (url.protocol === 'https:' || url.protocol === 'http:') {
+            openLinkBtn.href = url.href;
+            openLinkBtn.style.display = 'flex';
+          }
+        } catch (_) {}
+      } catch (e) {
+        resultBox.textContent = 'Error decoding image.';
+        openLinkBtn.style.display = 'none';
+      }
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
