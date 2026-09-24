@@ -7,6 +7,7 @@ if (!process.env.VERCEL) {
     dotenv.config();
 }
 
+import fs from "fs";
 import express from "express";
 import helmet from "helmet";
 import compression from 'compression';
@@ -16,7 +17,16 @@ import path from "path";
 import ejs from "ejs";
 import { fileURLToPath } from 'url';
 import morgan from 'morgan';
-import chalk from 'chalk';
+// Force Chalk to output colors regardless of environment detection
+process.env.FORCE_COLOR = '3';
+import chalk, { Chalk } from 'chalk';
+
+// Only emit ANSI color codes when actually attached to a color-capable
+// terminal. Without this guard, environments that don't render ANSI
+// (piped output, some debuggers/log viewers, non-TTY stdout) would show
+// the raw escape sequences as literal text instead of colored output.
+// Force color rendering at Level 3 (Truecolor/24-bit)
+const c = new Chalk({ level: 3 });
 import QRCode from "qrcode";
 import { MultiFormatReader, RGBLuminanceSource, BinaryBitmap, HybridBinarizer, DecodeHintType, BarcodeFormat } from '@zxing/library';
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
@@ -67,13 +77,13 @@ morgan.token('incoming_bytes', (req) => {
     const headersSize = req.rawHeaders ? req.rawHeaders.reduce((acc, current) => acc + current.length, 0) : 0;
     const bodySize = parseInt(req.headers['content-length'], 10) || 0;
     const totalIncomingBytes = headersSize + bodySize;
-    return chalk.yellow(formatBytes(totalIncomingBytes));
+    return formatBytes(totalIncomingBytes);
 });
 
 // Token to calculate outgoing response body volume
 morgan.token('outgoing_bytes', (req, res) => {
     const outgoing = parseInt(res.getHeader('content-length'), 10) || 0;
-    return chalk.green(formatBytes(outgoing));
+    return formatBytes(outgoing);
 });
 
 // Extract and normalize client IP
@@ -81,66 +91,62 @@ morgan.token('user_ip', (req) => {
     return req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '::1';
 });
 
-// Color-code HTTP methods natively
-morgan.token('color_method', (req) => {
-    const methods = {
-        GET: chalk.green.bold('GET'),
-        POST: chalk.blue.bold('POST'),
-        PUT: chalk.yellow.bold('PUT'),
-        DELETE: chalk.red.bold('DELETE')
-    };
-    return methods[req.method] || chalk.white.bold(req.method);
-});
-
-// Color-code response time based on execution latency thresholds
-morgan.token('color_res_time', (req, res) => {
-    if (!req._startAt || !res._startAt) return '0.00 ms';
-    const ms = (res._startAt[0] - req._startAt[0]) * 1e3 + (res._startAt[1] - req._startAt[1]) * 1e-6;
-    const formatted = `${ms.toFixed(2)} ms`;
-
-    if (ms > 400) return chalk.red.bold(formatted);
-    if (ms > 150) return chalk.yellow.bold(formatted);
-    return chalk.green(formatted);
-});
-
-// Extract operational context metadata safely (No raw data logging)
-morgan.token('qr_meta', (req) => {
-    if (req.originalUrl.startsWith('/api/generate')) {
-        const payload = { ...req.body, ...req.query };
-        const theme = payload.theme ? payload.theme.toLowerCase() : 'default';
-        const dataLength = payload.data ? String(payload.data).length : 0;
-        return chalk.gray(`[Theme: ${theme} | Len: ${dataLength}ch]`);
-    }
-    if (req.originalUrl.startsWith('/api/read')) {
-        const mode = req.headers['content-type']?.includes('application/json') ? 'Base64' : 'Binary';
-        return chalk.gray(`[Mode: ${mode}]`);
-    }
-    return '';
-});
-
 morgan.token('color_agent', (req) => {
-    return chalk.cyan(req.headers['user-agent'] || 'Unknown');
-});
-
-morgan.token('color_status', (req, res) => {
-    const status = res.statusCode;
-    const color = status >= 500 ? chalk.red.bold :
-        status >= 400 ? chalk.yellow.bold :
-            status >= 300 ? chalk.blue.bold : chalk.green.bold;
-    return color(status);
+    return req.headers['user-agent'] || 'Unknown';
 });
 
 const isVercel = !!process.env.VERCEL;
 
-const myCustomFormat = isVercel
-    ? `[:color_method] :url -> Status: :color_status | In: :incoming_bytes | Out: :outgoing_bytes | Time: :color_res_time | IP: :user_ip :qr_meta`
-    : `\n${chalk.bold.underline('📥 QR Codify Incoming Request')}\n` +
-    ` ├─ Request : :color_method ${chalk.white(':url')} HTTP/:http-version :qr_meta\n` +
-    ` ├─ Identity: IP '${chalk.magenta(':user_ip')}' | Agent: :color_agent\n` +
-    ` ├─ Traffic : Incoming: :incoming_bytes | Outgoing: :outgoing_bytes\n` +
-    ` └─ Outcome : Status :color_status in :color_res_time on [${chalk.green(':date[clf]')}]\n`;
+const myCustomFormat = (tokens, req, res) => {
+    // Extract operational context metadata safely (No raw data logging)
+    const qrMeta = () => {
+        if (req.originalUrl.startsWith('/api/generate')) {
+            const payload = { ...req.body, ...req.query };
+            const theme = payload.theme ? payload.theme.toLowerCase() : 'default';
+            const dataLength = payload.data ? String(payload.data).length : 0;
+            return c.gray(`[Theme: ${theme} | Len: ${dataLength}ch]`);
+        }
+        if (req.originalUrl.startsWith('/api/read')) {
+            const mode = req.headers['content-type']?.includes('application/json') ? 'Base64' : 'Binary';
+            return c.gray(`[Mode: ${mode}]`);
+        }
+        return '';
+    }
 
-app.use(morgan(myCustomFormat));
+    const methods = {
+        GET: c.green.bold('GET'),
+        POST: c.blue.bold('POST'),
+        PUT: c.yellow.bold('PUT'),
+        DELETE: c.red.bold('DELETE')
+    };
+
+    const status = res.statusCode;
+    const color = status >= 500 ? c.red.bold :
+        status >= 400 ? c.yellow.bold :
+            status >= 300 ? c.blue.bold : c.green.bold;
+
+    if (!req._startAt || !res._startAt) return '0.00 ms';
+    const ms = (res._startAt[0] - req._startAt[0]) * 1e3 + (res._startAt[1] - req._startAt[1]) * 1e-6;
+    const formatted = `${ms.toFixed(2)} ms`;
+
+    if (ms > 400) return c.red.bold(formatted);
+    if (ms > 150) return c.yellow.bold(formatted);
+    const finalTime = c.green(formatted);
+
+    return isVercel
+        ? `[${methods[req.method]}] ${chalk.white(tokens.url(req, res))} -> Status: ${color(status)} | In: ${chalk.cyan(tokens.incoming_bytes(req, res))} | Out: ${chalk.cyan(tokens.outgoing_bytes(req, res))} | Time: ${finalTime} | IP: ${chalk.red(tokens.user_ip(req, res))} ${qrMeta()}`
+        : `\n${chalk.bold.underline('📥 QR Codify Incoming Request')}\n` +
+        ` ├─ Request : ${methods[req.method]} ${chalk.white(tokens.url(req, res))} HTTP/${tokens['http-version'](req, res)} ${qrMeta()}\n` +
+        ` ├─ Identity: IP '${chalk.red(tokens.user_ip(req, res))}' | Agent: ${chalk.yellow(tokens.color_agent(req, res))}\n` +
+        ` ├─ Traffic : Incoming: ${chalk.cyan(tokens.incoming_bytes(req, res))} | Outgoing: ${chalk.cyan(tokens.outgoing_bytes(req, res))}\n` +
+        ` └─ Outcome : Status ${color(status)} in ${finalTime} on [${chalk.green(tokens.date(req, res, 'clf'))}]\n`;
+};
+
+app.use(morgan(myCustomFormat, {
+    stream: {
+        write: (message) => process.stdout.write(message)
+    }
+}));
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -245,73 +251,37 @@ app.get('/api/themes/:themeName/preview', async (req, res) => {
     }
 });
 
+app.get('/static/:name', (req, res) => {
+    try {
+        const name = req.params.name;
+
+        if (!name) return res.status(400).send(`Bad Request!`);
+
+        const fileStaticPath = path.join(__dirname, `../assets/${name}`);
+
+        if (!fs.existsSync(fileStaticPath)) return res.status(404).send(`Not Found!`);
+
+        return res.sendFile(fileStaticPath);
+
+    } catch (error) {
+        res.status(500).send(`Something broke!`);
+    }
+})
+
 app.get('/logo', async (req, res) => {
     try {
-        const size = 512;
-        const canvas = createCanvas(size, size);
-        const ctx = canvas.getContext('2d');
+        // QR-Codify image
 
-        function drawRoundedCard(x, y, w, h, r, fillStyle) {
-            r = Math.min(r, w / 2, h / 2);
-            ctx.fillStyle = fillStyle;
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-            ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-            ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        ctx.fillStyle = '#060913';
-        ctx.fillRect(0, 0, size, size);
-
-        const eyeX = 64;
-        const eyeY = 196;
-
-        drawRoundedCard(eyeX, eyeY, 120, 120, 32, '#00E5FF');
-        drawRoundedCard(eyeX + 22, eyeY + 22, 76, 76, 18, '#060913');
-        drawRoundedCard(eyeX + 40, eyeY + 40, 40, 40, 10, '#00E5FF');
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-
-        const textStartX = 214;
-        const textCenterY = eyeY + 60;
-
-        ctx.font = '700 48px "Geist Mono"';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('QR', textStartX, textCenterY - 10);
-
-        const qrWidth = ctx.measureText('QR ').width;
-
-        ctx.font = '700 48px "Geist Mono"';
-        ctx.fillStyle = '#94A3B8';
-        ctx.fillText('Codify', textStartX + qrWidth, textCenterY - 10);
-
-        ctx.fillStyle = '#00E5FF';
-        ctx.fillRect(textStartX, textCenterY + 32, 6, 6);
-
-        ctx.font = '500 16px "Geist Mono"';
-        ctx.fillStyle = '#475569';
-        ctx.fillText('QR Codes done right!', textStartX + 16, textCenterY + 34);
-
-        const buffer = await canvas.toBuffer('image/png');
-
+        const imagePath = path.join(__dirname, "../assets/QR-Codify.png");
         res.type('image/png');
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('QR-Codify-Logo', 'true');
         res.setHeader('QR-Codify-Engine-Version', packageJson.version);
 
-        return res.send(buffer);
+        return res.sendFile(imagePath);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ status: 'failed', message: 'Failed to generate the server logo.' });
+        return res.status(500).json({ status: 'failed', message: 'Something broke in the server side!' });
     }
 });
 
@@ -836,6 +806,84 @@ app.post('/api/read', rawParser, async (req, res) => {
         // Generic fallback error catch
         console.error(error);
         return res.status(500).json({ success: false, error: "An error occurred while reading the QR code." });
+    }
+});
+
+app.get("/api/uploadbyurl", async (req, res) => {
+    try {
+        const { url } = req.query;
+
+        // 1. Reject immediately if query 'url' is missing or not a string
+        if (!url || typeof url !== 'string') {
+            return res.status(400).json({ 
+                success: false, 
+                error: "Please enter a valid image URL in the 'url' query parameter!" 
+            });
+        }
+
+        // 2. Reject immediately if URL format or protocol is invalid
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(url);
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                throw new Error("Invalid protocol");
+            }
+        } catch (e) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "Invalid image URL provided. Must be a valid http or https URL." 
+            });
+        }
+
+        const abortController = new AbortController();
+        const timeout = setTimeout(() => abortController.abort(), 8000);
+
+        // 3. Pre-flight check / fetch with User-Agent
+        const response = await fetch(parsedUrl.href, {
+            signal: abortController.signal,
+            headers: { 'User-Agent': req.headers['user-agent'] || 'QR-Codify' }
+        }).finally(() => clearTimeout(timeout));
+
+        if (!response.ok) {
+            return res.status(400).json({ 
+                success: false, 
+                error: `Failed to fetch image from URL (HTTP ${response.status}).` 
+            });
+        }
+
+        // 4. Reject immediately if Content-Type is not an image
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.startsWith('image/')) {
+            return res.status(400).json({ 
+                success: false, 
+                error: `URL payload is not a valid image. Received Content-Type: '${contentType || 'unknown'}'.` 
+            });
+        }
+
+        // 5. Download buffer only after Content-Type confirmation
+        const arrayBuffer = await response.arrayBuffer();
+        const imageBuffer = Buffer.from(arrayBuffer);
+
+        // Forward image buffer to internal /api/read route
+        const host = req.get('host');
+        const protocol = req.protocol;
+        const readApiURL = `${protocol}://${host}/api/read`;
+
+        const readResponse = await fetch(readApiURL, {
+            method: 'POST',
+            body: JSON.stringify({ image: imageBuffer.toString('base64') }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const parsedQRData = await readResponse.json();
+        return res.status(readResponse.status).json(parsedQRData);
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            return res.status(504).json({ success: false, error: "Request timed out while fetching image from URL." });
+        }
+        console.error("Error in /api/uploadbyurl:", error);
+        return res.status(500).json({ status: 'failed', message: 'Something broke! Oops!' });
     }
 });
 
