@@ -1918,8 +1918,8 @@ if (data.success) {
       const code = `// REST API — Decode a QR code directly from an image URL
 // Rate limit: 45 requests/min per IP
 
-// Sample QR Code from Google Drive, contains a surprise text!
-const imageUrl = 'https://drive.google.com/drive-viewer/AKGpihbaUTJ-aWfmAPEbBvsuuqyACqxHq8BX393fPsyfZbuzMVib7z6eMc1voTw8HtgM5BOBtgfmf1gwwi7kay-L0lV0xyajkNjGZ88=w1147-h912'; // Replace with your desired image URL
+// Sample QR Code from QR-Codify's public-assets repo branch, contains a surprise text!
+const imageUrl = 'https://raw.githubusercontent.com/BlazeInferno64/QR-Codify/refs/heads/public-assets/BlazeInferno64-logo.png'; // Replace with your desired image URL
 
 const response = await fetch('${window.location.origin}/api/uploadbyurl?url=' + encodeURIComponent(imageUrl));
 
