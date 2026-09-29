@@ -3,7 +3,7 @@ All in one QR Codes solution
 |------|
 
 
-# View it here in Vercel
+# View it here in Vercel 👇 
 
 <a href='https://qr-codify.vercel.app/'>
 
