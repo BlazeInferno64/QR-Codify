@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="shortcut icon" href="/logo" type="image/x-icon">
+  <title>QR Codify — Live QR Code Scanner | Scan with your camera, right in the browser</title>
+  <meta name="description"
+    content="Scan QR codes live with your camera. Decoding happens 100% on your device — nothing is uploaded or stored. Free and open source." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700,400i,500i,700i&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script defer src="https://kit.fontawesome.com/f3220d5256.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* ---- Material 3 dark scheme, tuned to the QR Codify brand hues ---- */
+      --md-surface-dim: #0b0a0f;
+      --md-surface: #131218;
+      --md-surface-container-low: #19171f;
+      --md-surface-container: #1e1c25;
+      --md-surface-container-high: #26232e;
+      --md-surface-container-highest: #302d3a;
+
+      --md-on-surface: #e7e1ec;
+      --md-on-surface-variant: #a8a2b3;
+      --md-outline: rgba(231, 225, 236, 0.14);
+      --md-outline-variant: rgba(231, 225, 236, 0.08);
+
+      --md-primary: #b7c3ff;
+      --md-on-primary: #16215f;
+      --md-primary-container: #2e3480;
+      --md-on-primary-container: #dee1ff;
+
+      --md-tertiary: #7ddbec;
+      --md-on-tertiary: #003640;
+      --md-tertiary-container: #063e46;
+      --md-on-tertiary-container: #b6ebf9;
+
+      --md-success: #94d9a4;
+      --md-success-container: #0f3a1e;
+      --md-warning: #f6cf7a;
+      --md-warning-container: #402d05;
+      --md-error: #ffb0ac;
+      --md-error-container: #4a1615;
+
+      --shape-xs: 8px;
+      --shape-sm: 12px;
+      --shape-md: 16px;
+      --shape-lg: 20px;
+      --shape-xl: 28px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      overflow-x: hidden;
+      background: var(--md-surface-dim);
+      color: var(--md-on-surface);
+      font-family: "Google Sans", "Google Sans Text", "Roboto", "Segoe UI", Arial, sans-serif;
+      padding-top: 64px;
+    }
+
+    button {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    code,
+    .font-mono {
+      font-family: "Geist Mono", monospace;
+    }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      line-height: 1;
+      font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0;
+    }
+
+    /* ============ Top app bar ============ */
+    .md-app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 1030;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(14px, 4vw, 32px);
+      background: rgba(20, 18, 26, 0.92);
+      backdrop-filter: saturate(160%) blur(10px);
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+
+    .md-app-bar__brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--md-on-surface);
+      text-decoration: none;
+    }
+
+    .md-app-bar__mark {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1.5px rgba(183, 195, 255, 0.4),
+        0 0 0 4px rgba(183, 195, 255, 0.06),
+        0 2px 10px rgba(0, 0, 0, 0.45);
+      transition: box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .md-app-bar__mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .md-app-bar__brand:hover .md-app-bar__mark {
+      box-shadow:
+        0 0 0 1.5px var(--md-primary),
+        0 0 0 5px rgba(183, 195, 255, 0.14),
+        0 2px 12px rgba(0, 0, 0, 0.5);
+      transform: scale(1.05);
+    }
+
+    /* Ripple sits on a white mark, so tint it dark instead of the default white */
+    .md-app-bar__mark .md-ripple {
+      background: rgba(22, 33, 95, 0.28);
+    }
+
+    .md-app-bar__actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .md-icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-on-surface-variant);
+      background: transparent;
+      border: none;
+      transition: background 140ms ease, color 140ms ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .md-icon-btn:hover {
+      background: rgba(231, 225, 236, 0.08);
+      color: var(--md-on-surface);
+    }
+
+    .md-icon-btn[aria-pressed="true"] {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+
+    /* ============ Ambient orbs ============ */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 320px;
+      height: 320px;
+      top: -60px;
+      right: -60px;
+      background: #6366f1;
+      opacity: 0.10;
+    }
+
+    .orb-2 {
+      width: 260px;
+      height: 260px;
+      bottom: -60px;
+      left: -60px;
+      background: #7ddbec;
+      opacity: 0.06;
+    }
+
+    @media(prefers-reduced-motion:no-preference) {
+      .fade-up {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: rise 0.5s cubic-bezier(.2, .7, .2, 1) forwards;
+      }
+    }
+
+    .delay-1 {
+      animation-delay: .05s;
+    }
+
+    .delay-2 {
+      animation-delay: .10s;
+    }
+
+    @keyframes rise {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============ Surfaces ============ */
+    .md-surface {
+      background: var(--md-surface-container);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-xl);
+      position: relative;
+    }
+
+    .md-surface--elevated {
+      background: var(--md-surface-container-high);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.28);
+    }
+
+    .md-card {
+      background: var(--md-surface-container-low);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-md);
+      transition: background 160ms ease, border-color 160ms ease;
+      position: relative;
+    }
+
+    .md-card:hover {
+      background: var(--md-surface-container);
+      border-color: var(--md-outline);
+    }
+
+    .md-card--tight {
+      border-radius: var(--shape-sm);
+    }
+
+    .md-label {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--md-primary);
+      margin-bottom: 8px;
+    }
+
+    .md-section-header {
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.015em;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 16px;
+      text-transform: capitalize;
+    }
+
+    .md-section-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #b7c3ff, #7ddbec);
+      border-radius: 2px;
+    }
+
+    @media(max-width: 768px) {
+      .md-section-header {
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
+        padding-bottom: 12px;
+      }
+
+      .md-section-header::after {
+        height: 3px;
+      }
+    }
+
+    /* ============ Chips ============ */
+    .md-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .78rem;
+      font-weight: 500;
+      padding: 7px 14px 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--md-outline);
+      color: var(--md-on-surface-variant);
+      background: var(--md-surface-container-high);
+      white-space: nowrap;
+    }
+
+    .md-chip .material-symbols-outlined {
+      font-size: 1.05rem;
+    }
+
+    .chip-tone-success {
+      color: var(--md-success);
+      border-color: rgba(148, 217, 164, 0.3);
+      background: rgba(148, 217, 164, 0.08);
+    }
+
+    .chip-tone-primary {
+      color: var(--md-primary);
+      border-color: rgba(183, 195, 255, 0.3);
+      background: rgba(183, 195, 255, 0.08);
+    }
+
+    .chip-tone-tertiary {
+      color: var(--md-tertiary);
+      border-color: rgba(125, 219, 236, 0.3);
+      background: rgba(125, 219, 236, 0.08);
+    }
+
+    .chip-tone-warning {
+      color: var(--md-warning);
+      border-color: rgba(246, 207, 122, 0.3);
+      background: rgba(246, 207, 122, 0.08);
+    }
+
+    /* ============ Buttons ============ */
+    .md-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-weight: 500;
+      font-size: .92rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .md-btn .material-symbols-outlined {
+      font-size: 1.2rem;
+    }
+
+    .md-btn--filled {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .md-btn--filled:hover {
+      filter: brightness(1.08);
+      color: #fff;
+    }
+
+    .md-btn--tonal {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+
+    .md-btn--tonal:hover {
+      background: #383e94;
+      color: var(--md-on-primary-container);
+    }
+
+    .md-btn--outlined {
+      background: transparent;
+      color: var(--md-on-surface);
+      border: 1px solid var(--md-outline);
+    }
+
+    .md-btn--outlined:hover {
+      background: rgba(231, 225, 236, 0.08);
+      color: var(--md-on-surface);
+    }
+
+    .md-btn--sm {
+      height: 40px;
+      padding: 0 18px;
+      font-size: .84rem;
+    }
+
+    .md-btn--block {
+      width: 100%;
+    }
+
+    /* ============ Ripple effect ============ */
+    .md-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      pointer-events: none;
+    }
+
+    @keyframes ripple-expand {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .md-ripple.active {
+      animation: ripple-expand 900ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============ Footer ============ */
+    footer {
+      border-top: 1px solid var(--md-outline-variant);
+      background: var(--md-surface-container-low);
+    }
+
+    footer a {
+      transition: color 150ms;
+      color: var(--md-on-surface-variant) !important;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--md-primary) !important;
+    }
+
+    /* ============ Live scanner ============ */
+    .scanner-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .scan-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--shape-xl);
+      overflow: hidden;
+      background: var(--md-surface-dim);
+      border: 1px solid var(--md-outline-variant);
+      isolation: isolate;
+    }
+
+    .scan-stage video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .scan-stage video.mirror {
+      transform: scaleX(-1);
+    }
+
+    /* Dimmed mask + centered reticle: the reticle box is exactly the region that gets decoded */
+    .scan-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70%;
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%);
+      border-radius: var(--shape-lg);
+      box-shadow: 0 0 0 999px rgba(11, 10, 15, 0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 220ms ease;
+    }
+
+    .scan-stage[data-state="scanning"] .scan-reticle,
+    .scan-stage[data-state="found"] .scan-reticle {
+      opacity: 1;
+    }
+
+    .scan-corner {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border: 4px solid var(--md-primary);
+      transition: border-color 200ms ease;
+    }
+
+    .scan-corner.tl {
+      top: -2px;
+      left: -2px;
+      border-right: 0;
+      border-bottom: 0;
+      border-top-left-radius: var(--shape-lg);
+    }
+
+    .scan-corner.tr {
+      top: -2px;
+      right: -2px;
+      border-left: 0;
+      border-bottom: 0;
+      border-top-right-radius: var(--shape-lg);
+    }
+
+    .scan-corner.bl {
+      bottom: -2px;
+      left: -2px;
+      border-right: 0;
+      border-top: 0;
+      border-bottom-left-radius: var(--shape-lg);
+    }
+
+    .scan-corner.br {
+      bottom: -2px;
+      right: -2px;
+      border-left: 0;
+      border-top: 0;
+      border-bottom-right-radius: var(--shape-lg);
+    }
+
+    .scan-stage[data-state="found"] .scan-corner {
+      border-color: var(--md-success);
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--md-tertiary), transparent);
+      box-shadow: 0 0 12px rgba(125, 219, 236, 0.7);
+      animation: scan-sweep 2.2s ease-in-out infinite alternate;
+    }
+
+    .scan-stage[data-state="found"] .scan-line {
+      display: none;
+    }
+
+    @keyframes scan-sweep {
+      from {
+        top: 8%;
+      }
+
+      to {
+        top: 92%;
+      }
+    }
+
+    /* Idle / starting / error panel shown before the camera is live */
+    .scan-idle {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      text-align: center;
+      background: linear-gradient(160deg, var(--md-surface-container-highest) 0%, var(--md-surface-container-low) 100%);
+    }
+
+    .scan-stage[data-state="scanning"] .scan-idle,
+    .scan-stage[data-state="found"] .scan-idle {
+      display: none;
+    }
+
+    .scan-idle__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--shape-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+
+    .scan-idle__icon .material-symbols-outlined {
+      font-size: 2rem;
+    }
+
+    .scan-idle p {
+      margin: 0;
+      font-size: .85rem;
+      color: var(--md-on-surface-variant);
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    .scan-stage[data-state="error"] .scan-idle__icon {
+      background: var(--md-error-container);
+      color: var(--md-error);
+    }
+
+    .scan-status {
+      font-size: .82rem;
+      color: var(--md-on-surface-variant);
+      text-align: center;
+      min-height: 1.3em;
+    }
+
+    #scanResult {
+      font-size: 0.85rem;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: var(--md-surface-dim);
+      padding: 12px;
+      border-radius: var(--shape-xs);
+      font-family: "Geist Mono", monospace;
+      color: var(--md-on-surface);
+      border: 1px solid var(--md-outline-variant);
+      margin: 0;
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <header class="md-app-bar">
+    <a href="/" class="md-app-bar__brand">
+      <span class="md-app-bar__mark">
+        <img src="/static/QR-Codify.png" alt="QR Codify logo">
+      </span>
+      QR Codify
+    </a>
+    <div class="md-app-bar__actions">
+      <a class="md-icon-btn" href="/" title="Back to generator">
+        <span class="material-symbols-outlined">home</span>
+      </a>
+      <a class="md-icon-btn" href="https://github.com/blazeinferno64/QR-Codify" target="_blank"
+        rel="noopener noreferrer" title="View on GitHub">
+        <i class="fa fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <main class="container py-4 py-md-5">
+    <section class="md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up scanner-wrap">
+
+      <h1 class="md-section-header">Live QR scanner</h1>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="md-chip chip-tone-success"><span class="material-symbols-outlined">lock</span>Decoded on your device</span>
+        <span class="md-chip chip-tone-tertiary"><span class="material-symbols-outlined">bolt</span>Real-time</span>
+      </div>
+
+      <div class="scan-stage" id="scanStage" data-state="idle">
+        <video id="scanVideo" playsinline muted autoplay></video>
+
+        <div class="scan-reticle" aria-hidden="true">
+          <i class="scan-corner tl"></i><i class="scan-corner tr"></i>
+          <i class="scan-corner bl"></i><i class="scan-corner br"></i>
+          <div class="scan-line"></div>
+        </div>
+
+        <div class="scan-idle" id="scanIdle">
+          <div class="scan-idle__icon"><span class="material-symbols-outlined" id="scanIdleIcon">photo_camera</span></div>
+          <p id="scanIdleText">Allow camera access, then hold a QR code inside the frame. It scans instantly — no photo needed.</p>
+          <button id="startBtn" type="button" class="md-btn md-btn--filled">
+            <span class="material-symbols-outlined">qr_code_scanner</span><span id="startBtnLabel">Start camera</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="scan-status mt-3" id="scanStatus" aria-live="polite">Camera is off</div>
+
+      <div class="d-flex justify-content-center gap-2 mt-1" id="camControls" style="display:none !important;">
+        <button id="torchBtn" type="button" class="md-icon-btn" title="Toggle flashlight" aria-pressed="false"
+          style="display:none;">
+          <span class="material-symbols-outlined">flashlight_on</span>
+        </button>
+        <button id="switchBtn" type="button" class="md-icon-btn" title="Switch camera" style="display:none;">
+          <span class="material-symbols-outlined">cameraswitch</span>
+        </button>
+        <button id="stopBtn" type="button" class="md-icon-btn" title="Turn camera off">
+          <span class="material-symbols-outlined">videocam_off</span>
+        </button>
+      </div>
+
+      <div class="md-card md-card--tight p-3 mt-3" id="resultCard" style="display:none;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="fw-semibold mb-0 text-white small">Scanned contents</h6>
+          <span class="md-chip chip-tone-success" id="resultType" style="font-size:.7rem;padding:4px 10px 4px 8px;">
+            <span class="material-symbols-outlined" style="font-size:.95rem;">check_circle</span><span>Text</span>
+          </span>
+        </div>
+        <pre id="scanResult"></pre>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <a id="scanOpenLink" href="#" target="_blank" rel="noopener noreferrer"
+            class="md-btn md-btn--tonal md-btn--sm md-btn--block" style="display:none;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">open_in_new</span>Open link
+          </a>
+          <div class="d-flex gap-2">
+            <button id="copyBtn" type="button" class="md-btn md-btn--outlined md-btn--sm flex-fill">
+              <span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span>Copy
+            </button>
+            <button id="againBtn" type="button" class="md-btn md-btn--filled md-btn--sm flex-fill">
+              <span class="material-symbols-outlined" style="font-size:1rem;">restart_alt</span>Scan again
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="scanner-wrap text-center mb-4 fade-up delay-1">
+      <a href="/" class="md-btn md-btn--tonal md-btn--sm">
+        <span class="material-symbols-outlined">arrow_back</span> Back to homepage
+      </a>
+    </div>
+  </main>
+
+  <footer class="py-4 mt-2">
+    <div
+      class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 text-center text-md-start">
+      <div class="d-flex flex-column flex-sm-row align-items-center gap-2 gap-sm-3">
+        <span class="fw-bold text-white" style="font-size:.9rem;">QR Codify</span>
+        <span class="small" style="display: flex; align-items: center; gap: 5px; color:var(--md-on-surface-variant);opacity:.6;">
+          <span class="material-symbols-outlined">copyright</span> <%- serverYear %></span>
+        <div class="d-flex gap-2">
+          <span class="md-chip chip-tone-success" style="font-size:.64rem;padding:4px 10px 4px 8px;"><span
+              class="material-symbols-outlined" style="font-size:.95rem;">lock</span>No data stored</span>
+          <span class="md-chip chip-tone-primary" style="font-size:.64rem;padding:4px 10px 4px 8px;"><span
+              class="material-symbols-outlined" style="font-size:.95rem;">code</span>Open source</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3 small">
+        <a href="https://github.com/blazeinferno64" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span style="color:var(--md-on-surface-variant);opacity:.4;">·</span>
+        <span style="color:var(--md-on-surface-variant);">Made by BlazeInferno64</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- jsQR: fallback decoder for browsers without the native BarcodeDetector API (allowed by the CSP: cdn.jsdelivr.net) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script>
+    // Material Design Ripple Effect
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement('div');
+      const rect = button.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+
+      const x = (event.clientX || event.touches?.[0]?.clientX || 0) - rect.left - size / 2;
+      const y = (event.clientY || event.touches?.[0]?.clientY || 0) - rect.top - size / 2;
+
+      ripple.classList.add('md-ripple');
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+
+      button.appendChild(ripple);
+      ripple.classList.add('active');
+
+      setTimeout(() => ripple.remove(), 900);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.md-btn, .md-icon-btn, .md-app-bar__mark').forEach(btn => {
+        btn.addEventListener('pointerdown', createRipple);
+      });
+
+      const $ = (id) => document.getElementById(id);
+      const stage = $('scanStage'), video = $('scanVideo');
+      const statusEl = $('scanStatus'), controls = $('camControls');
+      const torchBtn = $('torchBtn'), switchBtn = $('switchBtn');
+
+      const REGION = 0.7;          // fraction of the shorter video side decoded (matches the .scan-reticle width)
+      const MAX_DECODE_PX = 640;   // downscale the crop for speed
+      const TICK_MS = 50;          // ~20 decode attempts per second
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      let stream = null, rafId = 0, scanning = false, busy = false, lastTick = 0;
+      let facing = 'environment', torchOn = false, detector = null;
+
+      // Native, hardware-accelerated decoder where available (Chrome/Android, Safari); jsQR everywhere else
+      if ('BarcodeDetector' in window) {
+        try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (_) { detector = null; }
+      }
+
+      function setState(state, text) {
+        stage.dataset.state = state;
+        if (text !== undefined) statusEl.textContent = text;
+        controls.style.setProperty('display', (state === 'scanning' || state === 'found') ? 'flex' : 'none', 'important');
+      }
+
+      function showIdle(icon, message, label, state) {
+        $('scanIdleIcon').textContent = icon;
+        $('scanIdleText').textContent = message;
+        $('startBtnLabel').textContent = label;
+        setState(state);
+      }
+
+      function stopCamera() {
+        scanning = false;
+        cancelAnimationFrame(rafId);
+        stream?.getTracks().forEach(t => t.stop());
+        stream = null;
+        video.srcObject = null;
+        torchOn = false;
+        torchBtn.setAttribute('aria-pressed', 'false');
+        torchBtn.style.display = 'none';
+        switchBtn.style.display = 'none';
+      }
+
+      async function startCamera() {
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+          showIdle('lock', 'Camera access needs a secure connection. Open this page over HTTPS (or localhost).', 'Try again', 'error');
+          statusEl.textContent = 'Camera unavailable on insecure connection';
+          return;
+        }
+        stopCamera();
+        $('resultCard').style.display = 'none';
+        showIdle('hourglass_top', 'Waiting for camera permission…', 'Starting…', 'starting');
+        statusEl.textContent = 'Requesting camera access…';
+
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } }
+          });
+          video.classList.toggle('mirror', stream.getVideoTracks()[0]?.getSettings?.().facingMode === 'user');
+          video.srcObject = stream;
+          await video.play();
+
+          const caps = stream.getVideoTracks()[0]?.getCapabilities?.() || {};
+          torchBtn.style.display = caps.torch ? 'inline-flex' : 'none';
+
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoInputs = devices.filter(d => d.kind === 'videoinput');
+            switchBtn.style.display = videoInputs.length > 1 ? 'inline-flex' : 'none';
+          } catch (_) {
+            switchBtn.style.display = 'none';
+          }
+
+          setState('scanning', 'Point the camera at a QR code');
+          scanning = true;
+          rafId = requestAnimationFrame(tick);
+        } catch (err) {
+          stopCamera();
+          const map = {
+            NotAllowedError: ['no_photography', 'Camera permission was denied. Allow camera access for this site in your browser settings, then try again.'],
+            NotFoundError: ['videocam_off', 'No camera was found on this device.'],
+            NotReadableError: ['videocam_off', 'The camera is being used by another app. Close it and try again.'],
+            OverconstrainedError: ['videocam_off', 'This camera could not satisfy the requested settings.']
+          };
+          const [icon, msg] = map[err.name] || ['error', 'Could not start the camera.'];
+          showIdle(icon, msg, 'Try again', 'error');
+          statusEl.textContent = 'Camera off';
+        }
+      }
+
+      async function decodeFrame() {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!vw || !vh) return null;
+
+        // Only the centre square (what's inside the reticle) is analysed
+        const side = Math.floor(Math.min(vw, vh) * REGION);
+        const sx = Math.floor((vw - side) / 2), sy = Math.floor((vh - side) / 2);
+        const out = Math.min(side, MAX_DECODE_PX);
+        if (canvas.width !== out) canvas.width = canvas.height = out;
+        ctx.drawImage(video, sx, sy, side, side, 0, 0, out, out);
+
+        if (detector) {
+          try {
+            const codes = await detector.detect(canvas);
+            if (codes.length) return codes[0].rawValue;
+            return null;
+          } catch (_) { detector = null; /* fall through to jsQR */ }
+        }
+        const img = ctx.getImageData(0, 0, out, out);
+        // attemptBoth also reads light-on-dark codes (QR Codify's dark themes)
+        const code = jsQR(img.data, out, out, { inversionAttempts: 'attemptBoth' });
+        return code ? code.data : null;
+      }
+
+      async function tick(t) {
+        if (!scanning) return;
+        rafId = requestAnimationFrame(tick);
+        if (busy || t - lastTick < TICK_MS || video.readyState < 2 || video.paused) return;
+        lastTick = t;
+        busy = true;
+        try {
+          const text = await decodeFrame();
+          if (text) onResult(text);
+        } catch (_) { /* ignore a bad frame */ }
+        busy = false;
+      }
+
+      function onResult(text) {
+        scanning = false;
+        cancelAnimationFrame(rafId);
+        video.pause();                       // freeze on the frame that matched
+        navigator.vibrate?.(60);
+        setState('found', 'QR code detected');
+
+        $('scanResult').textContent = text;
+        const link = $('scanOpenLink');
+        const typeChip = $('resultType');
+        let isUrl = false;
+        try {
+          const url = new URL(text.trim());
+          if (url.protocol === 'https:' || url.protocol === 'http:') {
+            link.href = url.href;
+            isUrl = true;
+          }
+        } catch (_) { }
+        link.style.display = isUrl ? 'flex' : 'none';
+        typeChip.lastElementChild.textContent = isUrl ? 'Link' : 'Text';
+        $('resultCard').style.display = 'block';
+        $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      async function scanAgain() {
+        if (!stream) return startCamera();
+        $('resultCard').style.display = 'none';
+        setState('scanning', 'Point the camera at a QR code');
+        try {
+          await video.play();
+        } catch (_) {}
+        lastTick = performance.now() + 350;
+        scanning = true;
+        rafId = requestAnimationFrame(tick);
+      }
+
+      $('startBtn').addEventListener('click', startCamera);
+      $('againBtn').addEventListener('click', scanAgain);
+      $('stopBtn').addEventListener('click', () => {
+        stopCamera();
+        showIdle('photo_camera', 'Camera is off. Start it again whenever you\'re ready.', 'Start camera', 'idle');
+        statusEl.textContent = 'Camera is off';
+      });
+      switchBtn.addEventListener('click', () => {
+        facing = facing === 'environment' ? 'user' : 'environment';
+        startCamera();
+      });
+      torchBtn.addEventListener('click', async () => {
+        try {
+          torchOn = !torchOn;
+          await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: torchOn }] });
+          torchBtn.setAttribute('aria-pressed', String(torchOn));
+        } catch (_) { torchOn = false; torchBtn.setAttribute('aria-pressed', 'false'); }
+      });
+      $('copyBtn').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText($('scanResult').textContent);
+          statusEl.textContent = 'Copied to clipboard';
+        } catch (_) { statusEl.textContent = 'Could not copy — select the text manually'; }
+      });
+
+      // Release the camera when the tab is hidden or the page is left
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && stage.dataset.state === 'scanning') {
+          stopCamera();
+          showIdle('photo_camera', 'Camera paused while the tab was in the background.', 'Resume camera', 'idle');
+          statusEl.textContent = 'Camera paused';
+        }
+      });
+      window.addEventListener('pagehide', stopCamera);
+    });
+  </script>
+</body>
+
+</html>

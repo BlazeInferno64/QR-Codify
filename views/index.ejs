@@ -4,7 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="shortcut icon" href="/logo" type="image/x-icon">
+  <meta name="theme-color" content="#131218" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="shortcut icon" href="/static/QR-Codify.ico" type="image/x-icon">
   <title>QR Codify — Free, Open Source QR Code Generator & Scanner | QR Codes done right!</title>
   <meta name="description"
     content="Generate and scan QR codes instantly. No data stored, 100% free and open source. Themed QR codes with a clean REST API for developers. QR Codes done right!" />
@@ -369,6 +373,88 @@
       background: rgba(246, 207, 122, 0.08);
     }
 
+    /* "New & Updated" highlight badge — sits on the card's top edge like a notch label */
+    .md-badge-new {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 28px;
+      padding: 0 12px 0 8px;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-weight: 600;
+      color: var(--md-primary);
+      /* solid base layer so the card border doesn't show through the tint */
+      background:
+        linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(125, 219, 236, 0.12)),
+        var(--md-surface-container-high);
+      border: 1px solid rgba(183, 195, 255, 0.3);
+      white-space: nowrap;
+    }
+
+    @media (min-width: 768px) {
+      .md-badge-new {
+        left: 3rem;
+        /* lines up with the card's content edge (p-md-5) */
+        transform: translateY(-50%);
+      }
+    }
+
+    /* ============ Live scanner promo card ============ */
+    .md-icon-avatar.scanner-promo__avatar {
+      width: 56px;
+      height: 56px;
+    }
+
+    .scanner-promo__desc {
+      color: var(--md-on-surface-variant);
+      font-size: .92rem;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 767.98px) {
+      .scanner-promo {
+        /* clear the badge, which hangs 14px below the card's top edge */
+        padding-top: 2.25rem !important;
+      }
+
+      .md-icon-avatar.scanner-promo__avatar {
+        width: 48px;
+        height: 48px;
+      }
+
+      .scanner-promo__avatar .material-symbols-outlined {
+        font-size: 1.5rem !important;
+      }
+
+      .scanner-promo .md-chip {
+        font-size: .72rem;
+        padding: 6px 12px 6px 8px;
+      }
+
+      .scanner-promo__title {
+        font-size: 1.2rem;
+        margin-bottom: .4rem !important;
+      }
+
+      .scanner-promo__desc {
+        font-size: .86rem;
+        line-height: 1.6;
+        max-width: 34em;
+        margin-inline: auto !important;
+      }
+    }
+
+    .md-badge-new .material-symbols-outlined {
+      font-size: 1rem;
+      color: var(--md-tertiary);
+    }
+
     /* ============ Buttons (M3 shapes: filled / tonal / outlined / text) ============ */
     .md-btn {
       display: inline-flex;
@@ -412,6 +498,29 @@
     .md-btn--tonal:hover {
       background: #383e94;
       color: var(--md-on-primary-container);
+    }
+
+    .md-btn--tertiary {
+      background: var(--md-tertiary-container);
+      color: var(--md-on-tertiary-container);
+    }
+
+    .md-btn--tertiary:hover {
+      background: #0b4d57;
+      color: var(--md-on-tertiary-container);
+    }
+
+    /* Hero action buttons: stacked on phones, 2 x 2 grid from the sm breakpoint up */
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 576px) {
+      .hero-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     .md-btn--outlined {
@@ -934,6 +1043,22 @@
       font-weight: 700;
     }
 
+    /* Generate QR modal, wide desktop only (>= 1200px, where .modal-xl widens the dialog to 1140px):
+       lay the form fields out in two columns so the modal fits the viewport.
+       Below 1200px nothing here applies, so tablet and mobile are unchanged. */
+    @media (min-width: 1200px) {
+      .generate-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        align-content: start;
+      }
+
+      .generate-fields>.md-card:first-child {
+        grid-column: 1 / -1;
+      }
+    }
+
     @media (max-width: 576px) {
       .modal-dialog.modal-fullscreen-sm-down {
         margin: 0.5rem auto;
@@ -1099,6 +1224,9 @@
       QR Codify
     </a>
     <div class="md-app-bar__actions">
+      <button id="installAppBtnTop" type="button" class="md-icon-btn" title="Install App" style="display: none;">
+        <span id="install-icon-customise" class="material-symbols-outlined">install_mobile</span>
+      </button>
       <button id="openApiExampleBtnTop" type="button" class="md-icon-btn" title="API example">
         <span class="material-symbols-outlined">code</span>
       </button>
@@ -1127,19 +1255,23 @@
           </h1>
           <p class="mb-4" style="color:var(--md-on-surface-variant); font-size:1rem; line-height:1.6;">
             Generate styled QR codes and decode images in seconds. No sign-up, no tracking, no data retention — your
-            content is processed securely and discarded the moment the image is sent back to you. <br><b>Your privacy is our first priority!</b>
+            content is processed securely and discarded the moment the image is sent back to you. <br><b>Your privacy is
+              our first priority!</b>
           </p>
 
-          <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-2 mb-4">
-            <button type="button" class="md-btn md-btn--filled md-btn--block w-sm-auto" data-bs-toggle="modal"
+          <div class="hero-actions mb-4">
+            <button type="button" class="md-btn md-btn--filled md-btn--block" data-bs-toggle="modal"
               data-bs-target="#generateModal">
               <span class="material-symbols-outlined">qr_code</span> Generate QR
             </button>
-            <button type="button" class="md-btn md-btn--outlined md-btn--block w-sm-auto" data-bs-toggle="modal"
+            <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-toggle="modal"
               data-bs-target="#scanModal">
               <span class="material-symbols-outlined">qr_code_scanner</span> Scan QR
             </button>
-            <button id="openApiExampleBtn" type="button" class="md-btn md-btn--tonal md-btn--block w-sm-auto">
+            <a style="user-select: none;" href="/scanner" class="md-btn md-btn--tertiary md-btn--block">
+              <span class="material-symbols-outlined">photo_camera</span> Live QR Scanner
+            </a>
+            <button id="openApiExampleBtn" type="button" class="md-btn md-btn--tonal md-btn--block">
               <span class="material-symbols-outlined">code</span> API example
             </button>
           </div>
@@ -1212,6 +1344,38 @@
         <div class="col-6 col-md-3 md-stat">
           <div class="md-stat__num">∞</div>
           <div class="md-stat__label">free forever, no rate-wall</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scanner-promo md-surface md-surface--elevated p-3 p-sm-4 p-md-5 mb-4 fade-up delay-1">
+      <span class="md-badge-new"><span class="material-symbols-outlined">auto_awesome</span>New &amp; Updated</span>
+      <div class="row align-items-center g-3 g-md-4">
+        <div class="col-md-8 text-center text-md-start">
+          <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-3">
+            <div class="md-icon-avatar scanner-promo__avatar mb-0">
+              <span class="material-symbols-outlined" style="font-size:1.7rem;">photo_camera</span>
+            </div>
+            <div>
+              <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2 mb-2">
+                <span class="md-chip chip-tone-tertiary"><span
+                    class="material-symbols-outlined">bolt</span>Real-time</span>
+                <span class="md-chip chip-tone-success"><span class="material-symbols-outlined">lock</span>Decoded on
+                  your
+                  device</span>
+              </div>
+              <h2 class="h4 md-headline text-white mb-2 scanner-promo__title">Live QR scanner</h2>
+              <p class="scanner-promo__desc mb-0">
+                Point your camera at any QR code and get the result instantly — no photo, no upload. Decoding runs
+                entirely in your browser, so nothing ever leaves your device.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 d-flex justify-content-center justify-content-md-end" style="user-select: none;">
+          <a href="/scanner" class="md-btn md-btn--filled md-btn--block">
+            <span class="material-symbols-outlined">qr_code_scanner</span> Open live scanner
+          </a>
         </div>
       </div>
     </section>
@@ -1557,9 +1721,9 @@
       class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 text-center text-md-start">
       <div class="d-flex flex-column flex-sm-row align-items-center gap-2 gap-sm-3">
         <span class="fw-bold text-white" style="font-size:.9rem;">QR Codify</span>
-        <span class="small" style="display: flex; align-items: center; gap: 5px; color:var(--md-on-surface-variant);opacity:.6;">
-          <span
-            class="material-symbols-outlined">
+        <span class="small"
+          style="display: flex; align-items: center; gap: 5px; color:var(--md-on-surface-variant);opacity:.6;">
+          <span class="material-symbols-outlined">
             copyright
           </span> <%- serverYear %></span>
         <div class="d-flex gap-2">
@@ -1578,7 +1742,7 @@
   </footer>
 
   <div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header px-3 py-3">
           <div>
@@ -1609,7 +1773,7 @@
               </div>
             </div>
             <!-- Form fields: below on mobile, left on desktop -->
-            <div class="col-lg-6 order-2 order-lg-1">
+            <div class="col-lg-6 order-2 order-lg-1 generate-fields">
               <div class="md-card md-card--tight p-3 mb-2.5">
                 <label for="generateText" class="form-label fw-semibold">Text / URL to encode</label>
                 <textarea id="generateText" class="form-control" rows="3" placeholder="https://example.com"></textarea>
@@ -1635,6 +1799,13 @@
                   <option value="png">PNG (Lossless)</option>
                   <option value="jpg">JPG (Compressed)</option>
                   <option value="svg">SVG (Scalable)</option>
+                </select>
+              </div>
+              <div class="md-card md-card--tight p-3">
+                <label for="keepbranding" class="form-label fw-semibold">Branding</label>
+                <select id="keepbranding" class="form-select">
+                  <option value="true">Yes (Recommended)</option>
+                  <option value="false">No</option>
                 </select>
               </div>
             </div>
@@ -1814,6 +1985,41 @@
       document.getElementById('uploadByUrlApiTab')?.addEventListener('click', () => switchApiTab('uploadByUrl'));
     });
 
+    // PWA Install to Homescreen Logic
+    let deferredPrompt = null;
+    const installAppBtnTop = document.getElementById('installAppBtnTop');
+
+    function showInstallPrompts() {
+      if (installAppBtnTop) installAppBtnTop.style.display = 'inline-flex';
+    }
+
+    function hideInstallPrompts() {
+      if (installAppBtnTop) installAppBtnTop.style.display = 'none';
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallPrompts();
+    });
+
+    async function handleInstallClick() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        hideInstallPrompts();
+      }
+      deferredPrompt = null;
+    }
+
+    installAppBtnTop?.addEventListener('click', handleInstallClick);
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      hideInstallPrompts();
+    });
+
     document.getElementById("updatePreviewBtn").addEventListener("click", updateModalDownloadLink);
 
     function updateModalDownloadLink() {
@@ -1823,8 +2029,10 @@
       const size = document.getElementById('generateSize')?.value || '500';
       const formatElement = document.getElementById('generateFormat');
       const format = formatElement?.value || 'png';
+      const brandingElement = document.getElementById('keepbranding');
+      const branding = brandingElement?.value || true;
 
-      let previewUrl = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}&format=${format}`;
+      let previewUrl = `/api/generate?data=${encodeURIComponent(text)}&size=${size}x${size}&format=${format}&keepBanner=${branding}`;
       let downloadUrl = previewUrl;
       if (theme) {
         previewUrl += `&theme=${theme}`;
@@ -2050,6 +2258,57 @@ if (data.success) {
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/BlazeInferno64/platformify.js@main/platformify.js"></script>
+  <script>
+    const iconCustom = document.querySelector("#install-icon-customise");
+
+    const installAppParent = document.querySelector("#installAppBtnTop");
+
+    const platformify = new Platformify();
+    let data = null;
+
+    platformify.getSystemInfo()
+      .then(data => {
+        const platform = data.platform;
+        if (platform === "Windows" || platform === "macOS" || platform === "Linux") {
+          iconCustom.innerText = "install_desktop";
+        } else {
+          return;
+        }
+      })
+      .catch(err => console.error(err));
+
+
+    window.addEventListener('appinstalled', () => {
+      alert(`Thank you for installiing QR-Codify!`);
+    });
+
+    function isPwa() {
+      // Check if the display-mode matches standalone, fullscreen, or minimal-ui
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
+      const isMinimalUi = window.matchMedia('(display-mode: minimal-ui)').matches;
+
+      // Legacy Safari / iOS check
+      const isSafariStandalone = window.navigator.standalone === true;
+
+      return isStandalone || isFullscreen || isMinimalUi || isSafariStandalone;
+    }
+
+    if (isPwa()) {
+      installAppParent.style.display = "none";
+    }
+
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', (evt) => {
+      if (evt.matches) {
+        console.log('Switched to standalone PWA mode');
+        installAppParent.style.display = "none";
+      } else {
+        console.log('Switched to browser tab mode');
+        installAppParent.style.display = "block";
+      }
+    });
+    
+  </script>
 </body>
 
 </html>

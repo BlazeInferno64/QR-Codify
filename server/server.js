@@ -21,11 +21,7 @@ import morgan from 'morgan';
 process.env.FORCE_COLOR = '3';
 import chalk, { Chalk } from 'chalk';
 
-// Only emit ANSI color codes when actually attached to a color-capable
-// terminal. Without this guard, environments that don't render ANSI
-// (piped output, some debuggers/log viewers, non-TTY stdout) would show
-// the raw escape sequences as literal text instead of colored output.
-// Force color rendering at Level 3 (Truecolor/24-bit)
+
 const c = new Chalk({ level: 3 });
 import QRCode from "qrcode";
 import { MultiFormatReader, RGBLuminanceSource, BinaryBitmap, HybridBinarizer, DecodeHintType, BarcodeFormat } from '@zxing/library';
@@ -189,6 +185,19 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get("/scanner", (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('QR-Codify-Engine-Version', packageJson.version);
+    const year = new Date().getFullYear();
+    return res.render('scanner', {
+        'themeNum': 4,
+        'themeWord': 'Four',
+        'previewTheme': 'cyber',
+        'serverYear': year,
+        'rateLim': myLimit,
+    });
+})
+
 app.get('/health', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('QR-Codify-Engine-Version', packageJson.version);
@@ -295,7 +304,7 @@ app.get('/favicon.ico', (req, res) => {
 // ====================================================================
 app.all('/api/generate', async (req, res) => {
     try {
-        let data, size, theme, queryBanner, format;
+        let data, size, theme, queryBanner, format, keepBannerRaw;
         let bannerBuffer = null;
         const contentType = req.headers['content-type'] || '';
 
@@ -329,6 +338,7 @@ app.all('/api/generate', async (req, res) => {
                     theme = combined.theme;
                     queryBanner = combined.banner;
                     format = combined.format;
+                    keepBannerRaw = combined.keepBanner;
                     bannerBuffer = fileBuffer;
                     resolve();
                 });
@@ -345,17 +355,26 @@ app.all('/api/generate', async (req, res) => {
                 req.on('end', () => resolve(Buffer.concat(chunks)));
                 req.on('error', (err) => reject(err));
             });
-            ({ data, size, theme, format } = req.query);
+            ({ data, size, theme, format, keepBanner: keepBannerRaw } = req.query);
         }
         // C. FALLBACK TO STANDARD JSON PAYLOAD (Matches express.json parsing layers)
         else {
-            ({ data, size, theme, banner: queryBanner, format } = { ...req.body, ...req.query });
+            ({ data, size, theme, banner: queryBanner, format, keepBanner: keepBannerRaw } = { ...req.body, ...req.query });
 
             if (queryBanner && typeof queryBanner === 'string') {
                 const rawBase64 = queryBanner.startsWith('data:image') ? queryBanner.split(',')[1] : queryBanner;
                 const cleanBase64 = rawBase64.trim().replace(/ /g, '+');
                 bannerBuffer = Buffer.from(cleanBase64, 'base64');
             }
+        }
+
+        // keepBanner: true (default) keeps the centre branding; false removes it.
+        // Accepts booleans and the strings 'false' / '0' / 'no' / 'off' (any case).
+        const keepBanner = !(keepBannerRaw === false || ['false', '0', 'no', 'off'].includes(String(keepBannerRaw ?? '').trim().toLowerCase()));
+        if (!keepBanner) {
+            // No centre overlay of any kind, so ignore a supplied banner too
+            bannerBuffer = null;
+            queryBanner = null;
         }
 
         // --- VALIDATION LAYER ---
@@ -454,9 +473,11 @@ app.all('/api/generate', async (req, res) => {
         const centerStart = Math.floor((moduleCount - bannerMatrixSize) / 2);
         const centerEnd = centerStart + bannerMatrixSize;
 
-        for (let r = centerStart; r < centerEnd; r++) {
-            for (let c = centerStart; c < centerEnd; c++) {
-                qrMatrix.set(r, c, 0);
+        if (keepBanner) {
+            for (let r = centerStart; r < centerEnd; r++) {
+                for (let c = centerStart; c < centerEnd; c++) {
+                    qrMatrix.set(r, c, 0);
+                }
             }
         }
 
@@ -469,7 +490,7 @@ app.all('/api/generate', async (req, res) => {
                 );
                 if (inFinder) continue;
 
-                if (col >= centerStart && col < centerEnd && row >= centerStart && row < centerEnd) {
+                if (keepBanner && col >= centerStart && col < centerEnd && row >= centerStart && row < centerEnd) {
                     continue;
                 }
 
@@ -545,7 +566,7 @@ app.all('/api/generate', async (req, res) => {
             }
         }
 
-        if (!hasImageBanner) {
+        if (keepBanner && !hasImageBanner) {
             const badgeSize = qrSize * 0.24;
             const centerPos = (qrSize - badgeSize) / 2;
             const centerCoord = qrSize / 2;
@@ -614,7 +635,7 @@ app.all('/api/generate', async (req, res) => {
   <text x="${centerX}" y="${centerY - 7}" font-family="monospace" font-size="${qrSize * 0.068}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${svgMainColor}">QR</text>
   <text x="${centerX}" y="${centerY + 18}" font-family="monospace" font-size="${qrSize * 0.052}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${svgSubColor}">Codify</text>`;
 
-            const svgWithLogo = svgString.replace('</svg>', `${logoOverlay}\n</svg>`);
+            const svgWithLogo = keepBanner ? svgString.replace('</svg>', `${logoOverlay}\n</svg>`) : svgString;
             const svgBuffer = Buffer.from(svgWithLogo, 'utf-8');
             res.type('image/svg+xml');
             res.setHeader('Cache-Control', 'no-store');
@@ -815,9 +836,9 @@ app.get("/api/uploadbyurl", async (req, res) => {
 
         // 1. Reject immediately if query 'url' is missing or not a string
         if (!url || typeof url !== 'string') {
-            return res.status(400).json({ 
-                success: false, 
-                error: "Please enter a valid image URL in the 'url' query parameter!" 
+            return res.status(400).json({
+                success: false,
+                error: "Please enter a valid image URL in the 'url' query parameter!"
             });
         }
 
@@ -829,9 +850,9 @@ app.get("/api/uploadbyurl", async (req, res) => {
                 throw new Error("Invalid protocol");
             }
         } catch (e) {
-            return res.status(400).json({ 
-                success: false, 
-                error: "Invalid image URL provided. Must be a valid http or https URL." 
+            return res.status(400).json({
+                success: false,
+                error: "Invalid image URL provided. Must be a valid http or https URL."
             });
         }
 
@@ -845,18 +866,18 @@ app.get("/api/uploadbyurl", async (req, res) => {
         }).finally(() => clearTimeout(timeout));
 
         if (!response.ok) {
-            return res.status(400).json({ 
-                success: false, 
-                error: `Failed to fetch image from URL (HTTP ${response.status}).` 
+            return res.status(400).json({
+                success: false,
+                error: `Failed to fetch image from URL (HTTP ${response.status}).`
             });
         }
 
         // 4. Reject immediately if Content-Type is not an image
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.startsWith('image/')) {
-            return res.status(400).json({ 
-                success: false, 
-                error: `URL payload is not a valid image. Received Content-Type: '${contentType || 'unknown'}'.` 
+            return res.status(400).json({
+                success: false,
+                error: `URL payload is not a valid image. Received Content-Type: '${contentType || 'unknown'}'.`
             });
         }
 
