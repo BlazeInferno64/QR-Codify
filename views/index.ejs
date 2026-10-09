@@ -490,6 +490,28 @@
       color: #fff;
     }
 
+    .md-btn--warning {
+      background: var(--md-warning);
+      color: var(--md-warning-container);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .md-btn--warning:hover {
+      filter: brightness(1.04);
+      color: var(--md-warning-container);
+    }
+
+    .md-btn--success {
+      background: var(--md-success);
+      color: var(--md-success-container);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .md-btn--success:hover {
+      filter: brightness(1.04);
+      color: var(--md-success-container);
+    }
+
     .md-btn--tonal {
       background: var(--md-primary-container);
       color: var(--md-on-primary-container);
@@ -1006,6 +1028,11 @@
       background: var(--md-surface-container-high);
     }
 
+    #scanFileInput:focus-visible+.scan-file-trigger {
+      outline: 2px solid var(--md-primary);
+      outline-offset: 3px;
+    }
+
     .form-label {
       font-size: .8rem;
       color: var(--md-on-surface-variant);
@@ -1208,6 +1235,838 @@
         transition: none !important;
       }
     }
+
+    /* =====================================================================
+       Material 3 Expressive refresh (Lucid-inspired)
+       Pure override layer: appended after the original styles, no markup,
+       content, ids or script behaviour were changed.
+       ===================================================================== */
+
+    :root {
+      /* Rounder, more expressive shape scale */
+      --shape-xs: 12px;
+      --shape-sm: 16px;
+      --shape-md: 20px;
+      --shape-lg: 28px;
+      --shape-xl: 32px;
+      --shape-2xl: 40px;
+
+      /* M3 motion tokens */
+      --md-ease-emphasized: cubic-bezier(.2, 0, 0, 1);
+      --md-ease-decel: cubic-bezier(.05, .7, .1, 1);
+      --md-ease-standard: cubic-bezier(.2, 0, 0, 1);
+
+      --md-glass: rgba(38, 35, 46, .72);
+      --md-primary-solid-hover: #c8d1ff;
+    }
+
+    /* Optional: Lucid's warm coral palette. Uncomment to swap the whole page.
+    :root {
+      --md-surface-dim: #0f0807;
+      --md-surface: #170d0b;
+      --md-surface-container-low: #1f1311;
+      --md-surface-container: #261815;
+      --md-surface-container-high: #302019;
+      --md-surface-container-highest: #3b2a24;
+      --md-on-surface: #f1dfd9;
+      --md-on-surface-variant: #d8c2ba;
+      --md-primary: #ffb59e;
+      --md-on-primary: #5b1a05;
+      --md-primary-container: #7a2e14;
+      --md-on-primary-container: #ffdbd0;
+      --md-tertiary: #e5c26b;
+      --md-on-tertiary: #3e2e00;
+      --md-tertiary-container: #584400;
+      --md-on-tertiary-container: #ffe08a;
+    }
+    */
+
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--md-surface-container-highest) transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--md-surface-container-highest);
+      border-radius: 999px;
+      border: 2px solid var(--md-surface-dim);
+    }
+
+    ::selection {
+      background: rgba(183, 195, 255, .32);
+      color: #fff;
+    }
+
+    :where(a, button, summary, [tabindex]):focus-visible {
+      outline: 2px solid var(--md-primary);
+      outline-offset: 3px;
+    }
+
+    body {
+      padding-top: 72px;
+      font-feature-settings: "ss01", "kern";
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ Floating pill app bar (like Lucid's nav) ============ */
+    .md-app-bar {
+      height: 80px;
+      background: transparent;
+      border-bottom: 0;
+      backdrop-filter: none;
+      padding-inline: max(clamp(12px, 3vw, 24px), calc((100vw - 1320px) / 2 + 12px));
+      pointer-events: none;
+    }
+
+    .md-app-bar>* {
+      pointer-events: auto;
+    }
+
+    .md-app-bar__brand,
+    .md-app-bar__actions {
+      height: 56px;
+      background: var(--md-glass);
+      backdrop-filter: saturate(170%) blur(18px);
+      -webkit-backdrop-filter: saturate(170%) blur(18px);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 999px;
+      transition: background 250ms var(--md-ease-standard), box-shadow 250ms var(--md-ease-standard),
+        border-color 250ms var(--md-ease-standard);
+    }
+
+    .md-app-bar__brand {
+      padding: 0 22px 0 8px;
+      gap: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .md-app-bar__mark {
+      width: 40px;
+      height: 40px;
+    }
+
+    .md-app-bar__actions {
+      padding: 0 6px;
+      gap: 2px;
+    }
+
+    .md-app-bar.is-scrolled .md-app-bar__brand,
+    .md-app-bar.is-scrolled .md-app-bar__actions {
+      background: rgba(30, 28, 37, .9);
+      border-color: var(--md-outline);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    }
+
+    .md-icon-btn {
+      width: 44px;
+      height: 44px;
+      font-size: 1.15rem;
+      transition: background 200ms var(--md-ease-standard), color 200ms var(--md-ease-standard),
+        border-radius 250ms var(--md-ease-emphasized);
+    }
+
+    .md-icon-btn:hover {
+      background: rgba(183, 195, 255, .14);
+      color: var(--md-on-surface);
+    }
+
+    .md-icon-btn:active {
+      background: rgba(183, 195, 255, .22);
+      border-radius: 14px;
+    }
+
+    #installAppBtnTop.install-highlight {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: 0 0 0 4px rgba(183, 195, 255, .18), 0 0 18px rgba(183, 195, 255, .35);
+      animation: install-highlight-pulse 1s ease-in-out 5;
+    }
+
+    @keyframes install-highlight-pulse {
+      50% {
+        box-shadow: 0 0 0 7px rgba(183, 195, 255, .12), 0 0 24px rgba(183, 195, 255, .5);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #installAppBtnTop.install-highlight {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .md-app-bar__brand {
+        padding-right: 16px;
+        font-size: 1rem;
+      }
+
+      .md-icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    /* ============ Surfaces: bigger radii, tonal depth ============ */
+    .md-surface {
+      border-radius: var(--shape-xl);
+    }
+
+    @media (max-width: 575.98px) {
+      .md-surface {
+        border-radius: 28px;
+      }
+    }
+
+    .md-surface--elevated {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .28);
+    }
+
+    .md-card {
+      border-radius: var(--shape-lg);
+      transition: background 250ms var(--md-ease-standard), border-color 250ms var(--md-ease-standard),
+        transform 350ms var(--md-ease-emphasized), box-shadow 250ms var(--md-ease-standard);
+    }
+
+    .md-card--tight {
+      border-radius: var(--shape-sm);
+    }
+
+    /* Feature cards lift on hover */
+    .row>article>.md-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, .32);
+      border-color: rgba(183, 195, 255, .22);
+    }
+
+    /* Icon containers morph from squircle to circle (M3 Expressive shape morph) */
+    .md-icon-avatar {
+      border-radius: 18px;
+      transition: border-radius 400ms var(--md-ease-emphasized), transform 400ms var(--md-ease-emphasized);
+    }
+
+    .md-card:hover .md-icon-avatar {
+      border-radius: 50%;
+    }
+
+    /* ============ Hero ============ */
+    main>section:first-child {
+      border-radius: var(--shape-2xl);
+      background:
+        radial-gradient(60% 90% at 100% 0%, rgba(99, 102, 241, .20), transparent 62%),
+        radial-gradient(50% 70% at 0% 100%, rgba(125, 219, 236, .09), transparent 62%),
+        var(--md-surface-container-high);
+    }
+
+    @media (max-width: 575.98px) {
+      main>section:first-child {
+        border-radius: 32px;
+      }
+    }
+
+    main>section:first-child h1 {
+      font-size: clamp(2.25rem, 1.1rem + 3.6vw, 3.6rem);
+      font-weight: 600;
+      letter-spacing: -.035em;
+      line-height: 1.05 !important;
+    }
+
+    main>section:first-child .md-card {
+      background: var(--md-surface-container-low);
+      border-radius: var(--shape-xl);
+    }
+
+    /* ============ Buttons: state layers, emphasized motion, shape morph ============ */
+    .md-btn {
+      font-weight: 500;
+      letter-spacing: .01em;
+      transition: background 250ms var(--md-ease-standard), box-shadow 250ms var(--md-ease-standard),
+        border-radius 300ms var(--md-ease-emphasized), transform 300ms var(--md-ease-emphasized);
+    }
+
+    .md-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      opacity: 0;
+      transition: opacity 200ms var(--md-ease-standard);
+      pointer-events: none;
+    }
+
+    .md-btn:hover::before {
+      opacity: .08;
+    }
+
+    .md-btn:focus-visible::before {
+      opacity: .12;
+    }
+
+    .md-btn:active::before {
+      opacity: .12;
+    }
+
+    .md-btn:active {
+      border-radius: 18px;
+      transform: scale(.985);
+    }
+
+    .hero-actions .md-btn {
+      height: 56px;
+      font-size: 1rem;
+    }
+
+    .md-btn--filled {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .18);
+    }
+
+    .md-btn--filled:hover {
+      filter: none;
+      color: var(--md-on-primary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .32), 0 6px 16px rgba(0, 0, 0, .25);
+    }
+
+    .md-btn--error {
+      background: var(--md-error);
+      color: var(--md-error-container);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .18);
+    }
+
+    .md-btn--error:hover {
+      color: var(--md-error-container);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .32), 0 6px 16px rgba(0, 0, 0, .25);
+    }
+
+    .md-btn--error .md-ripple {
+      background: rgba(74, 22, 21, .28);
+    }
+
+    .md-btn--filled .md-ripple {
+      background: rgba(22, 33, 95, .28);
+    }
+
+    .md-btn--tonal:hover {
+      background: var(--md-primary-container);
+    }
+
+    .md-btn--tertiary:hover {
+      background: var(--md-tertiary-container);
+    }
+
+    .md-btn--outlined {
+      border: 1px solid rgba(231, 225, 236, .28);
+    }
+
+    .md-btn--outlined:hover {
+      background: transparent;
+    }
+
+    .md-btn--text:hover {
+      background: transparent;
+    }
+
+    /* ============ Chips ============ */
+    .md-chip {
+      min-height: 32px;
+      font-weight: 500;
+      transition: background 200ms var(--md-ease-standard), border-color 200ms var(--md-ease-standard);
+    }
+
+    /* ============ Section headers: lighter accent instead of a full-width bar ============ */
+    .md-section-header {
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 1.75rem;
+    }
+
+    .md-surface .md-section-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .md-section-header::after {
+      width: 100%;
+      height: 4px;
+      left: 0;
+      border-radius: 999px;
+    }
+
+    .md-section-header.text-center::after,
+    .text-center .md-section-header::after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @media (min-width: 992px) {
+      .text-lg-start .md-section-header::after {
+        left: 0;
+        transform: none;
+      }
+    }
+
+    .md-headline {
+      letter-spacing: -.02em;
+    }
+
+    /* ============ Stats strip ============ */
+    .md-stat__num {
+      font-size: clamp(2rem, 1.4rem + 2vw, 2.75rem);
+      font-weight: 600;
+      letter-spacing: -.03em;
+    }
+
+    @media (min-width: 768px) {
+      .md-stat+.md-stat {
+        border-left: 1px solid var(--md-outline-variant);
+      }
+    }
+
+    /* ============ Privacy tiles & API cards: flatter, tonal ============ */
+    .privacy-mini {
+      border-radius: var(--shape-lg);
+      padding: 22px 14px;
+    }
+
+    .privacy-mini__icon {
+      border-radius: 16px;
+    }
+
+    .api-endpoint {
+      background: var(--md-surface-container-low);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-md);
+      padding: 18px;
+    }
+
+    .api-endpoint::before {
+      display: none;
+    }
+
+    .api-endpoint:hover {
+      background: var(--md-surface-container);
+      border-color: rgba(183, 195, 255, .24);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+    }
+
+    .api-endpoint__icon {
+      border-radius: 10px;
+    }
+
+    .method {
+      border-radius: 999px;
+      padding: 3px 11px;
+    }
+
+    .api-endpoint__description code,
+    .api-endpoint__return {
+      border-radius: 8px;
+    }
+
+    .api-code-wrapper {
+      border-radius: var(--shape-sm);
+    }
+
+    /* ============ FAQ ============ */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .faq-list>.md-card {
+      border-radius: 20px;
+    }
+
+    .faq-list>.md-card:has(.faq-item__trigger[aria-expanded="true"]) {
+      background: var(--md-surface-container-high);
+      border-color: rgba(183, 195, 255, .28);
+    }
+
+    .faq-item__trigger {
+      border-radius: 20px;
+      transition: background 200ms var(--md-ease-standard);
+    }
+
+    .faq-item__trigger:hover {
+      background: rgba(231, 225, 236, .05);
+    }
+
+    .faq-item__chevron {
+      transition: transform 350ms var(--md-ease-emphasized), color 200ms;
+    }
+
+    /* ============ Form fields ============ */
+    .form-control,
+    .form-select {
+      padding: .75rem 1rem;
+      transition: border-color 200ms var(--md-ease-standard), box-shadow 200ms var(--md-ease-standard);
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+      border-color: rgba(231, 225, 236, .32) !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--md-primary) !important;
+      box-shadow: 0 0 0 1px var(--md-primary), 0 0 0 5px rgba(183, 195, 255, .14) !important;
+    }
+
+    .form-label {
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    /* ============ Dialogs ============ */
+    .modal-backdrop {
+      --bs-backdrop-opacity: .62;
+    }
+
+    .modal-backdrop.show {
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .modal.fade .modal-dialog {
+      transform: translateY(32px) scale(.94);
+      opacity: 0;
+      transition: transform 400ms var(--md-ease-decel), opacity 200ms linear;
+    }
+
+    .modal.show .modal-dialog {
+      transform: none;
+      opacity: 1;
+    }
+
+    .modal-content {
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .5) !important;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -.015em;
+    }
+
+    .btn-close {
+      border-radius: 50%;
+      padding: 12px;
+      transition: background-color 200ms var(--md-ease-standard);
+    }
+
+    .btn-close:hover {
+      background-color: rgba(231, 225, 236, .1);
+    }
+
+    /* ============ Footer ============ */
+    footer {
+      border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+    }
+
+    /* Keep hover-lift effects off touch devices */
+    @media (hover: none) {
+      .row>article>.md-card:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
+
+    /* =====================================================================
+       Mobile pass: performance, legibility, touch ergonomics, compact modals
+       ===================================================================== */
+
+    /* Touch behaviour: no grey tap flash (ripples already give feedback), no double-tap zoom delay */
+    a,
+    button,
+    .md-btn,
+    .md-icon-btn,
+    .faq-item__trigger,
+    .form-select,
+    label {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    h1,
+    h2,
+    .modal-title,
+    .md-section-header {
+      text-wrap: balance;
+    }
+
+    /* Ambient orbs: the original used filter: blur(100px) on fixed layers, which is very
+       costly on phone GPUs and makes scrolling janky. Radial gradients look the same for free. */
+    .orb {
+      filter: none;
+    }
+
+    .orb-1 {
+      background: radial-gradient(circle, #6366f1 0%, transparent 68%);
+      width: 520px;
+      height: 520px;
+      top: -160px;
+      right: -160px;
+      opacity: .16;
+    }
+
+    .orb-2 {
+      background: radial-gradient(circle, #7ddbec 0%, transparent 68%);
+      width: 440px;
+      height: 440px;
+      bottom: -160px;
+      left: -160px;
+      opacity: .09;
+    }
+
+    @media (max-width: 767.98px) {
+
+      .md-app-bar__brand,
+      .md-app-bar__actions {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        background: rgba(30, 28, 37, .86);
+      }
+
+      /* Full-screen backdrop blur is a known jank source on mobile browsers */
+      .modal-backdrop.show {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+
+      /* Lighter dialog entrance on phones */
+      .modal.fade:not(.show) .modal-dialog {
+        transform: translateY(24px);
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      body {
+        padding-top: 68px;
+      }
+
+      .md-app-bar {
+        height: 72px;
+        padding-inline: 12px;
+      }
+
+      .md-app-bar__brand,
+      .md-app-bar__actions {
+        height: 52px;
+      }
+
+      .md-app-bar__mark {
+        width: 36px;
+        height: 36px;
+      }
+
+      /* Hero */
+      main>section:first-child h1 {
+        font-size: clamp(1.75rem, 7.6vw, 2.25rem);
+        letter-spacing: -.03em;
+      }
+
+      .hero-actions .md-btn {
+        height: 52px;
+        font-size: .95rem;
+      }
+
+      .md-btn {
+        height: 48px;
+      }
+
+      .md-btn--sm {
+        height: 44px;
+      }
+
+      /* Legible text: the original dropped to 10-11px in several places */
+      .privacy-mini__title {
+        font-size: .86rem;
+      }
+
+      .privacy-mini__desc {
+        font-size: .75rem;
+        line-height: 1.5;
+      }
+
+      .api-endpoint__description {
+        font-size: .78rem;
+      }
+
+      .api-endpoint__endpoint-code {
+        font-size: .78rem;
+      }
+
+      .api-endpoint__return {
+        font-size: .76rem;
+      }
+
+      .api-endpoint .md-chip {
+        font-size: .7rem !important;
+      }
+
+      .md-stat__label {
+        font-size: .8rem;
+      }
+
+      .md-label {
+        font-size: .84rem;
+      }
+
+      .api-endpoint {
+        padding: 14px;
+        border-radius: 20px;
+      }
+
+      .faq-item__trigger {
+        padding: 14px;
+      }
+
+      /* Chips wrap cleanly */
+      .md-chip {
+        white-space: normal;
+      }
+
+      /* ---- Dialogs ---- */
+      /* 16px inputs stop iOS Safari from zooming the page on focus */
+      .modal-body .form-control,
+      .modal-body .form-select {
+        font-size: 16px !important;
+        min-height: 48px;
+      }
+
+      .modal-body textarea.form-control {
+        font-size: 16px !important;
+      }
+
+      /* Short modal bodies must follow the *dynamic* viewport, not 100vh behind the URL bar */
+      .modal-body {
+        max-height: calc(100dvh - 190px);
+        overscroll-behavior: contain;
+      }
+
+      .modal-content {
+        box-shadow: none !important;
+      }
+
+      /* Generate dialog: pair the small fields instead of one long single column */
+      .generate-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        align-content: start;
+      }
+
+      .generate-fields>.md-card {
+        margin-bottom: 0 !important;
+        padding: .75rem !important;
+      }
+
+      .generate-fields>.md-card {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .generate-fields>.md-card>.form-control,
+      .generate-fields>.md-card>.form-select {
+        margin-top: auto;
+      }
+
+      .generate-fields>.md-card:nth-child(1),
+      .generate-fields>.md-card:nth-child(2),
+      .generate-fields>.md-card:nth-child(5) {
+        grid-column: 1 / -1;
+      }
+
+      /* Footer actions: primary full width, secondary pair below */
+      .modal-footer .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .modal-footer .row>.col-12 {
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .modal-footer .row>.order-1 {
+        grid-column: 1 / -1;
+      }
+
+      .modal-footer {
+        padding: .75rem !important;
+      }
+
+      .modal-footer .md-btn {
+        height: 48px;
+        font-size: .9rem;
+      }
+
+      /* Scan dialog footer already uses two flex-fill buttons; keep them on one row */
+      .modal-footer.flex-row {
+        flex-direction: row !important;
+      }
+
+      .modal-footer.flex-row .md-btn {
+        width: auto;
+      }
+
+      /* The code samples scroll sideways inside their own box, never the page */
+      .api-code-wrapper pre {
+        max-height: 260px;
+      }
+    }
+
+    /* Very small phones */
+    @media (max-width: 359.98px) {
+      .md-app-bar__brand {
+        font-size: .95rem;
+        padding-right: 12px;
+        gap: 8px;
+      }
+
+      .md-icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .hero-actions .md-btn {
+        padding: 0 16px;
+      }
+    }
+
+    /* Landscape phones: short viewports shouldn't get a huge floating bar or tall dialogs */
+    @media (max-height: 500px) and (orientation: landscape) {
+      body {
+        padding-top: 64px;
+      }
+
+      .md-app-bar {
+        height: 64px;
+      }
+
+      .md-app-bar__brand,
+      .md-app-bar__actions {
+        height: 48px;
+      }
+
+      .modal-body {
+        max-height: calc(100dvh - 150px);
+      }
+    }
   </style>
 </head>
 
@@ -1264,14 +2123,14 @@
               data-bs-target="#generateModal">
               <span class="material-symbols-outlined">qr_code</span> Generate QR
             </button>
-            <button type="button" class="md-btn md-btn--outlined md-btn--block" data-bs-toggle="modal"
+            <button type="button" class="md-btn md-btn--error md-btn--block" data-bs-toggle="modal"
               data-bs-target="#scanModal">
               <span class="material-symbols-outlined">qr_code_scanner</span> Scan QR
             </button>
-            <a style="user-select: none;" href="/scanner" class="md-btn md-btn--tertiary md-btn--block">
+            <a style="user-select: none;" href="/scanner" class="md-btn md-btn--warning md-btn--block">
               <span class="material-symbols-outlined">photo_camera</span> Live QR Scanner
             </a>
-            <button id="openApiExampleBtn" type="button" class="md-btn md-btn--tonal md-btn--block">
+            <button id="openApiExampleBtn" type="button" class="md-btn md-btn--success md-btn--block">
               <span class="material-symbols-outlined">code</span> API example
             </button>
           </div>
@@ -1488,7 +2347,8 @@
           <h2 class="h4 md-headline text-white mb-2">Plug in, ship fast.</h2>
           <p class="small mb-3" style="color:var(--md-on-surface-variant);line-height:1.72;">No auth tokens, no setup.
             Hit the endpoint and get a PNG. Works from any language or HTTP client.</p>
-          <button id="openApiExampleBtn2" type="button" class="md-btn md-btn--tonal md-btn--sm md-btn--block w-lg-auto">
+          <button id="openApiExampleBtn2" type="button"
+            class="md-btn md-btn--filled md-btn--sm md-btn--block w-lg-auto">
             See full example <span class="material-symbols-outlined">open_in_new</span>
           </button>
         </div>
@@ -1599,11 +2459,11 @@
           </p>
           <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
             <a href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer"
-              class="md-btn md-btn--outlined md-btn--sm">
+              class="md-btn md-btn--filled md-btn--sm">
               <span class="material-symbols-outlined">star</span> Star on GitHub
             </a>
             <a href="https://github.com/blazeinferno64/QR-Codify" target="_blank" rel="noopener noreferrer"
-              class="md-btn md-btn--tonal md-btn--sm">
+              class="md-btn md-btn--filled md-btn--sm">
               <span class="material-symbols-outlined">fork_right</span> Fork &amp; self-host
             </a>
           </div>
@@ -1913,13 +2773,18 @@
         <div class="modal-body p-3">
           <div class="md-card md-card--tight p-3 mb-3">
             <label class="fw-semibold mb-2 text-white small">Upload image file</label>
-            <input id="scanFileInput" type="file" accept="image/*" class="form-control" />
+            <input id="scanFileInput" type="file" accept="image/*" class="visually-hidden" />
+            <label for="scanFileInput" class="md-btn md-btn--tonal md-btn--block scan-file-trigger">
+              <span class="material-symbols-outlined">upload_file</span>Choose image file
+            </label>
+            <div id="scanFileName" class="small mt-2 text-center" style="color:var(--md-on-surface-variant);"
+              aria-live="polite">No file selected</div>
           </div>
           <div class="md-card md-card--tight p-3">
             <h6 class="fw-semibold mb-2 text-white small">Decoded contents</h6>
             <pre id="scanResult">Waiting for target selection...</pre>
             <a id="scanOpenLink" href="#" target="_blank" rel="noopener noreferrer"
-              class="md-btn md-btn--tonal md-btn--sm md-btn--block mt-2" style="display:none;">
+              class="md-btn md-btn--filled md-btn--sm md-btn--block mt-2" style="display:none;">
               <span class="material-symbols-outlined" style="font-size:1rem;">open_in_new</span>Open link
             </a>
           </div>
@@ -1966,6 +2831,10 @@
 
       // QR preview & download link update only when the Update button is clicked
       document.getElementById('decodeUploadBtn')?.addEventListener('click', scanUploadedFile);
+      document.getElementById('scanFileInput')?.addEventListener('change', (event) => {
+        const fileName = document.getElementById('scanFileName');
+        if (fileName) fileName.textContent = event.currentTarget.files[0]?.name || 'No file selected';
+      });
 
       function openApiModal() {
         renderFetchExample();
@@ -1988,6 +2857,7 @@
     // PWA Install to Homescreen Logic
     let deferredPrompt = null;
     const installAppBtnTop = document.getElementById('installAppBtnTop');
+    const installRequested = new URLSearchParams(window.location.search).get('install') === 'true';
 
     function showInstallPrompts() {
       if (installAppBtnTop) installAppBtnTop.style.display = 'inline-flex';
@@ -2001,6 +2871,14 @@
       e.preventDefault();
       deferredPrompt = e;
       showInstallPrompts();
+      if (installRequested && installAppBtnTop) {
+        installAppBtnTop.classList.add('install-highlight');
+        installAppBtnTop.focus({ preventScroll: true });
+        window.setTimeout(() => {
+          installAppBtnTop.classList.remove('install-highlight');
+          if (document.activeElement === installAppBtnTop) installAppBtnTop.blur();
+        }, 5000);
+      }
     });
 
     async function handleInstallClick() {
@@ -2307,7 +3185,17 @@ if (data.success) {
         installAppParent.style.display = "block";
       }
     });
-    
+
+  </script>
+  <script>
+    // Floating app bar: add a tonal "scrolled" state once the page moves.
+    (function () {
+      var bar = document.querySelector('.md-app-bar');
+      if (!bar) return;
+      function update() { bar.classList.toggle('is-scrolled', window.scrollY > 8); }
+      update();
+      window.addEventListener('scroll', update, { passive: true });
+    })();
   </script>
 </body>
 

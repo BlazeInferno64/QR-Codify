@@ -62,6 +62,10 @@
       background: var(--md-surface-dim);
       color: var(--md-on-surface);
       font-family: "Google Sans", "Google Sans Text", "Roboto", "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 80px;
     }
 
     .material-symbols-outlined {
@@ -72,6 +76,115 @@
       vertical-align: middle;
       line-height: 1;
       font-variation-settings: 'opsz' 24, 'wght' 400, 'GRAD' 0;
+    }
+
+    /* ============ App bar ============ */
+    .md-app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1030;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-inline: max(clamp(12px, 3vw, 24px), calc((100vw - 1320px) / 2 + 12px));
+      pointer-events: none;
+    }
+
+    .md-app-bar > * {
+      pointer-events: auto;
+    }
+
+    .md-app-bar__brand,
+    .md-app-bar__actions {
+      height: 56px;
+      background: rgba(30, 28, 37, .72);
+      backdrop-filter: saturate(170%) blur(18px);
+      -webkit-backdrop-filter: saturate(170%) blur(18px);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 999px;
+      transition: background 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+    }
+
+    .md-app-bar__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 22px 0 8px;
+      color: var(--md-on-surface);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      text-decoration: none;
+    }
+
+    .md-app-bar__mark {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 1.5px rgba(183, 195, 255, .4), 0 0 0 4px rgba(183, 195, 255, .06),
+        0 2px 10px rgba(0, 0, 0, .45);
+      transition: box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .md-app-bar__mark img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .md-app-bar__brand:hover .md-app-bar__mark {
+      box-shadow: 0 0 0 1.5px var(--md-primary), 0 0 0 5px rgba(183, 195, 255, .14),
+        0 2px 12px rgba(0, 0, 0, .5);
+      transform: scale(1.05);
+    }
+
+    .md-app-bar__mark .md-ripple {
+      background: rgba(22, 33, 95, .28);
+    }
+
+    .md-app-bar__actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 6px;
+    }
+
+    .md-icon-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--md-on-surface-variant);
+      font-size: 1.15rem;
+      text-decoration: none;
+      transition: background 200ms ease, color 200ms ease, border-radius 250ms ease;
+    }
+
+    .md-icon-btn:hover {
+      background: rgba(183, 195, 255, .14);
+      color: var(--md-on-surface);
+    }
+
+    .md-icon-btn:active {
+      background: rgba(183, 195, 255, .22);
+      border-radius: 14px;
     }
 
     /* ============ Ambient orbs ============ */
@@ -146,6 +259,73 @@
     .md-btn--filled:hover {
       filter: brightness(1.08);
       color: #fff;
+    }
+
+    .md-btn--outlined:hover {
+      background: rgba(231, 225, 236, .08);
+      color: var(--md-on-surface);
+    }
+
+    .md-btn--filled .md-ripple {
+      background: rgba(22, 33, 95, .28);
+    }
+
+    /* ============ Footer ============ */
+    footer {
+      border-top: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+      background: var(--md-surface-container-low);
+    }
+
+    footer a {
+      color: var(--md-on-surface-variant);
+      text-decoration: none;
+      transition: color 140ms ease;
+    }
+
+    footer a:hover {
+      color: var(--md-primary);
+    }
+
+    .md-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 8px;
+      border: 1px solid var(--md-outline);
+      border-radius: 999px;
+      background: var(--md-surface-container-high);
+      color: var(--md-on-surface-variant);
+      font-size: .64rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .md-chip .material-symbols-outlined {
+      font-size: .95rem;
+    }
+
+    .chip-tone-success {
+      border-color: rgba(148, 217, 164, .3);
+      background: rgba(148, 217, 164, .08);
+      color: var(--md-success, #94d9a4);
+    }
+
+    .chip-tone-primary {
+      border-color: rgba(183, 195, 255, .3);
+      background: rgba(183, 195, 255, .08);
+      color: var(--md-primary);
+    }
+
+    main {
+      display: flex;
+      flex: 1 0 auto;
+      align-items: center;
+      width: 100%;
+    }
+
+    main > .row {
+      width: 100%;
     }
 
     /* ============ Badge ============ */
@@ -239,11 +419,35 @@
     /* ============ Responsive optimizations ============ */
     @media (max-width: 768px) {
       body {
-        padding: 0;
+        padding-top: 72px;
       }
 
       main {
-        padding: 2rem 1rem !important;
+        padding: 1.5rem 1rem !important;
+      }
+
+      .md-app-bar {
+        height: 72px;
+        padding-inline: 12px;
+      }
+
+      .md-app-bar__brand,
+      .md-app-bar__actions {
+        height: 52px;
+        background: rgba(30, 28, 37, .86);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .md-app-bar__brand {
+        gap: 8px;
+        padding-right: 16px;
+        font-size: 1rem;
+      }
+
+      .md-app-bar__mark {
+        width: 36px;
+        height: 36px;
       }
 
       .col-lg-8 {
@@ -316,6 +520,17 @@
       }
     }
 
+    @media (max-width: 420px) {
+      .md-app-bar__brand {
+        font-size: .95rem;
+      }
+
+      .md-icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
     /* ============ Typography ============ */
     h1 {
       color: var(--md-on-surface);
@@ -338,9 +553,24 @@
     }
   </style>
 </head>
-<body class="d-flex align-items-center">
+<body>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
+
+  <header class="md-app-bar">
+    <a href="/" class="md-app-bar__brand">
+      <span class="md-app-bar__mark">
+        <img src="/static/QR-Codify.png" alt="QR Codify logo">
+      </span>
+      QR Codify
+    </a>
+    <div class="md-app-bar__actions">
+      <a class="md-icon-btn" href="https://github.com/blazeinferno64/QR-Codify" target="_blank"
+        rel="noopener noreferrer" title="View on GitHub" aria-label="View on GitHub">
+        <span class="material-symbols-outlined">code</span>
+      </a>
+    </div>
+  </header>
 
   <main class="container py-5">
     <div class="row justify-content-center">
@@ -397,6 +627,28 @@
     </div>
   </main>
 
+  <footer class="py-4 mt-2">
+    <div
+      class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 text-center text-md-start">
+      <div class="d-flex flex-column flex-sm-row align-items-center gap-2 gap-sm-3">
+        <span class="fw-bold text-white" style="font-size:.9rem;">QR Codify</span>
+        <span class="small"
+          style="display:flex;align-items:center;gap:5px;color:var(--md-on-surface-variant);opacity:.6;">
+          <span class="material-symbols-outlined">copyright</span> <%= new Date().getFullYear() %>
+        </span>
+        <div class="d-flex gap-2">
+          <span class="md-chip chip-tone-success"><span class="material-symbols-outlined">lock</span>No data stored</span>
+          <span class="md-chip chip-tone-primary"><span class="material-symbols-outlined">code</span>Open source</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3 small">
+        <a href="https://github.com/blazeinferno64" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span style="color:var(--md-on-surface-variant);opacity:.4;">·</span>
+        <span style="color:var(--md-on-surface-variant);">Made by BlazeInferno64</span>
+      </div>
+    </div>
+  </footer>
+
   <script>
     // Material Design Ripple Effect
     function createRipple(event) {
@@ -420,7 +672,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.md-btn').forEach(btn => {
+      document.querySelectorAll('.md-btn, .md-icon-btn, .md-app-bar__mark').forEach(btn => {
         btn.addEventListener('pointerdown', createRipple);
       });
     });
